@@ -1,0 +1,216 @@
+paths:
+  /personnel/create-personnel-account:
+    post:
+      tags:
+        - PERSONNEL # Value of the tag
+      summary: CREATE PERSONNEL ACCOUNT
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-
+        - in: body # request body
+          name: create-personnel-account # name of request, can be any name
+          description: It enables personnels account to be created
+          required: true # can also be true depending on user preference
+          schema: # Schema definition
+            $ref: "#/definitions/createPersonnel"
+      responses:
+        200:
+          description: should return personnel created successfully         
+
+
+  /personnel/get-all-personnel:
+    get:
+      tags:
+        - COMPANY # Value of the tag
+      summary: GET ALL PERSONNELS.
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-0
+
+        - in: query
+          name: page
+          type: number
+          default: 1
+          required: true
+
+      responses:
+        200:
+          description: should return all personnels
+
+
+  /personnel/get-a-personnel:
+    get:
+      tags:
+        - PERSONNEL # Value of the tag
+      summary: GET A PERSONNEL.
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-0
+
+        - in: query
+          name: personalAuthId
+          type: string
+          default: 05533fe8-3c2d-4b13-8c20-3425754fc050
+          required: true
+       
+        - in: query
+          name: key
+          type: string
+          default: 05533fe8-3c2d-4b13-8c20-3425754fc050
+          required: false
+
+
+      responses:
+        200:
+          description: should return a personnel     
+
+
+  /personnel/delete-a-personnel:
+    delete:
+      tags:
+        - PERSONNEL # Value of the tag
+      summary: DELETE PERSONNEL ACCOUNT
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-
+        - in: body # request body
+          name: delete-account # name of request, can be any name
+          description: It enables company account to be deleted
+          required: true # can also be true depending on user preference
+          schema: # Schema definition
+            $ref: "#/definitions/deletePersonnel"
+      responses:
+        200:
+          description: should return account deleted successfully
+
+
+  /personnel/suspend-a-personnel:
+    put:
+      tags:
+        - PERSONNEL # Value of the tag
+      summary: SUSPEND PERSONNEL ACCOUNT
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-
+        - in: body # request body
+          name: suspend-personnel # name of request, can be any name
+          description: It enables personnel account to be suspended
+          required: true # can also be true depending on user preference
+          schema: # Schema definition
+            $ref: "#/definitions/suspendPersonnel"
+      responses:
+        200:
+          description: should return account suspended or unsuspended successfully
+
+
+
+
+  /personnel/create-personnel-new-key:
+    put:
+      tags:
+        - PERSONNEL # Value of the tag
+      summary: CREATING PERSONNEL NEW KEY
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-
+        - in: body # request body
+          name: create-key # name of request, can be any name
+          description: It enables personnel account key to be created
+          required: true # can also be true depending on user preference
+          schema: # Schema definition
+            $ref: "#/definitions/personnelKey"
+      responses:
+        200:
+          description: should return account suspended or unsuspended successfully
+
+
+
+
+
+definitions: # Schema definition for request body
+   
+  deletePersonnel:
+    type: object
+    properties:
+      personnelId:
+        type: string
+        default: 61dcba2f975d5458b6164f01     
+
+
+  createPersonnel:
+    type: object
+    properties:
+      email:
+        type: string
+        default: ada@gmail.com  
+
+      companyInfo:
+        type: object
+        properties:
+          id:
+            type: string
+            default: 34
+
+          name:
+            type: string
+            default: monday 
+
+          address:
+            type: string
+            default: No 45B New Amakaohia 
+
+        
+  suspendPersonnel:
+    type: object
+    properties:
+      personnelId:
+        type: string
+        default: 61dcba2f975d5458b6164f01  
+
+      type:
+        type: string
+        default: suspend
+
+
+  personnelKey:
+    type: object
+    properties:
+      personnelId:
+        type: string
+        default: 61dcba2f975d5458b6164f01  
+
+         
+    
+
+
+        

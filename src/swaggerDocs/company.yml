@@ -1,0 +1,178 @@
+paths:
+  /company/create-company:
+    post:
+      tags:
+        - COMPANY # Value of the tag
+      summary: CREATE COMPANY ACCOUNT
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-
+        - in: body # request body
+          name: create-company # name of request, can be any name
+          description: It enables users account to be deleted
+          required: true # can also be true depending on user preference
+          schema: # Schema definition
+            $ref: "#/definitions/createCompany"
+      responses:
+        200:
+          description: should return company created successfully         
+
+
+  /company/get-all-companies:
+    get:
+      tags:
+        - COMPANY # Value of the tag
+      summary: GET ALL COMPANIES.
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-0
+
+        - in: query
+          name: page
+          type: number
+          default: 1
+          required: true
+
+      responses:
+        200:
+          description: should return all companies
+
+
+  /company/get-a-company:
+    get:
+      tags:
+        - COMPANY # Value of the tag
+      summary: GET A COMPANY.
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-0
+
+        - in: query
+          name: companyId
+          type: string
+          default: 05533fe8-3c2d-4b13-8c20-3425754fc050
+          required: true
+      responses:
+        200:
+          description: should return a company     
+
+
+  /company/delete-account:
+    delete:
+      tags:
+        - COMPANY # Value of the tag
+      summary: DELETE COMPANY ACCOUNT
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-
+        - in: body # request body
+          name: delete-account # name of request, can be any name
+          description: It enables company account to be deleted
+          required: true # can also be true depending on user preference
+          schema: # Schema definition
+            $ref: "#/definitions/deleteCompany"
+      responses:
+        200:
+          description: should return account deleted successfully
+
+
+  /company/suspend-company:
+    delete:
+      tags:
+        - COMPANY # Value of the tag
+      summary: SUSPEND COMPANY ACCOUNT
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-
+        - in: body # request body
+          name: suspend-company # name of request, can be any name
+          description: It enables company account to be suspended
+          required: true # can also be true depending on user preference
+          schema: # Schema definition
+            $ref: "#/definitions/suspendCompany"
+      responses:
+        200:
+          description: should return account suspended or unsuspended successfully
+
+
+
+
+
+definitions: # Schema definition for request body
+   
+  deleteCompany:
+    type: object
+    properties:
+      companyId:
+        type: string
+        default: 61dcba2f975d5458b6164f01     
+
+
+  createCompany:
+    type: object
+    properties:
+      ownerId:
+        type: string
+        default: 61dcba2f975d5458b6164f01  
+
+      companyName:
+        type: string
+        default: sureMove  
+
+      owner:
+        type: boolean
+        default: true
+
+      email:
+        type: string
+        default: ada@gmail.com 
+
+      address:
+        type: string
+        default: Amazing street Spain
+
+
+      bykeCount:
+        type: number
+        default: 34 
+
+
+  suspendCompany:
+    type: object
+    properties:
+      companyId:
+        type: string
+        default: 61dcba2f975d5458b6164f01  
+
+      type:
+        type: string
+        default: suspend  
+    
+
+
+        
