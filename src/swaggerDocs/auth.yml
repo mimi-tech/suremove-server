@@ -193,6 +193,7 @@ definitions: # Schema definition for request body
       email:
         type: string
         default: miriam@gmail.com
+
       password:
         type: string
         default: password
@@ -211,14 +212,26 @@ definitions: # Schema definition for request body
 
       referralId:
         type: string
-        default: Mimi   
+        default: Mimi 
+
+      username:
+        type: string
+        default: Mimi 
+
+      gender:
+        type: string
+        default: Male
+
+      profileImageUrl:
+        type: string
+        default: rjrj.jpg          
 
   generalLogin:
     type: object
     properties:
       email:
         type: string
-        default: aloydanairdrops2+12@gmail.com
+        default: miriam@gmail.com
 
       password:
         type: string
@@ -287,7 +300,11 @@ definitions: # Schema definition for request body
 
       profileImageUrl:
         type: string
-        default: Mimi    
+        default: Mimi 
+
+      accountType:
+        type: string
+        default: contributor       
 
 
   deleteUser:

@@ -2,10 +2,14 @@ const mongoose = require("mongoose");
 
 const drivers = new mongoose.Schema(
   {
-    authId: {
+    driverAuthId: {
         type: String,
         unique: true,
         required: [true, "Id must be provided"],
+      },
+      companyId: {
+        type: String,
+        required: [true, "company Id must be provided"],
       },
 
       firstName: {
@@ -18,19 +22,19 @@ const drivers = new mongoose.Schema(
         required: [true, "Last name must be provided"],
       },
 
-      email: {
+      driverEmail: {
         type: String,
         unique:true,
         required: [true, "Email must be provided"],
       },
 
-      username: {
+      driverUsername: {
         type: String,
         unique:true,
         required: [true, "Username must be provided"],
       },
 
-      phoneNumber: {
+      driverPhoneNumber: {
         type: String,
         unique:true,
         required: [true, "Phone number must be provided"],
@@ -42,7 +46,7 @@ const drivers = new mongoose.Schema(
       
       },
 
-      profilePicure: {
+      profileImageUrl: {
         type: String,
         required: [true, "Picture must be provided"],
       
@@ -101,13 +105,14 @@ const drivers = new mongoose.Schema(
         default:false
       },
 
-      bookingCount: {
-        type: Object,
-        required: [true, "Booking count must be provided"],
+      approved: {
+        type: Boolean,
+        default:false
       },
 
       year: {
         type: Number,
+
       },
 
       week: {
@@ -169,7 +174,12 @@ const drivers = new mongoose.Schema(
         default: 0
       },
 
-  
+      dateAdded: {
+        type: String,
+        default: new Date().toLocaleString()
+      }
+
+
   },
  
  

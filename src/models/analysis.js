@@ -2,9 +2,8 @@ const mongoose = require("mongoose");
 
 const bookingAnalysis = new mongoose.Schema(
   {
-    authId: {
+    customerAuthId: {
         type: String,
-        unique: true,
         required: [true, "sender must have id"],
       },
       driverId: {
@@ -28,13 +27,13 @@ const bookingAnalysis = new mongoose.Schema(
       },
 
     sourceAddress: {
-      type: Number,
-      required: [true, "Source latitude must be provided"],
+      type: String,
+      required: [true, "Source address must be provided"],
     },
 
     destinationAddress: {
-        type: Number,
-        required: [true, "destination latitude must be provided"],
+        type: String,
+        required: [true, "destination address must be provided"],
       },
 
     item: {
@@ -142,10 +141,6 @@ const bookingAnalysis = new mongoose.Schema(
         required: [true, "method Of Payment is required"],
       },
       
-      companyDetails: {
-        type: Object,
-        required: [true, "Company details is required"],
-      },
 
   },
   {

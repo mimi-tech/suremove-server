@@ -15,7 +15,7 @@ const { getAllDriversOfACompany,deleteADriverAccount,suspendADriver } = require(
 
  const createCompany = async (params) => {
   try {
-    const {companyName, owner, email, bykeCount, address } = params;
+    const {companyName, owner, email, bykeCount, address, companyEmail } = params;
 
  //check if company owner has an account
  const isOwnerAccountExisting = await usersAccount.findOne({
@@ -30,12 +30,76 @@ if (!isOwnerAccountExisting) {
   };
 }
 
+//check if user has access to create company
+
+if(isOwnerAccountExisting.whoAreYou !== "owner"){
+  return {
+    status: false,
+    message: "You don't have access to create a company",
+  };
+}
+
 if(isOwnerAccountExisting.isEmailVerified != true){
   return {
       status: false,
-      message: "This user email in not verified.",
+      message: "Your email in not verified.",
     };
 }
+
+ //if user is not owner
+if(owner === false){
+  const isCompanyOwnerAccountExisting = await usersAccount.findOne({
+    email: companyEmail,
+    isActive:true
+  });
+
+  if(isCompanyOwnerAccountExisting){
+    if(isCompanyOwnerAccountExisting.isEmailVerified != true){
+      return {
+          status: false,
+          message: "This user email in not verified.",
+        };
+  }
+
+  //check if the company is already existing
+  const isCompanyExisting = await companies.findOne({
+    companyName: companyName,
+  });
+
+  if (isCompanyExisting) {
+    return {
+      status: false,
+      message: "This name has already taken",
+    };
+  }
+
+  //go ahead and create company account
+  await companies.create({
+    companyName: companyName,
+    owner:owner,
+    bykeCount:bykeCount,
+    address:address,
+    ownerId:isCompanyOwnerAccountExisting._id,
+    email:isCompanyOwnerAccountExisting.email
+  });
+ 
+ 
+  isCompanyOwnerAccountExisting.whoAreYou = "company";
+  isCompanyOwnerAccountExisting.save();
+
+  return {
+    status: true,
+    message: "Company created successfully",
+  };
+
+}else{
+  return {
+    status: false,
+    message: "Couldn't find user with this email",
+  };
+}
+}
+
 
     //check if the company is already existing
     const isCompanyExisting = await companies.findOne({
@@ -55,11 +119,12 @@ if(isOwnerAccountExisting.isEmailVerified != true){
       owner:owner,
       bykeCount:bykeCount,
       address:address,
-      ownerId:isOwnerAccountExisting._id
+      ownerId:isOwnerAccountExisting._id,
+      email:isOwnerAccountExisting.email
     });
    
    
-    isOwnerAccountExisting.whoAreYou = owner === true?"owner": "company";
+    isOwnerAccountExisting.whoAreYou = "owner";
     isOwnerAccountExisting.save();
 
 
@@ -68,6 +133,7 @@ if(isOwnerAccountExisting.isEmailVerified != true){
       message: "Company account successfully",
     };
   } catch (e) {
+    console.log(e);
     return {
       status: false,
       message: constants.SERVER_ERROR("CREATING COMPANY ACCOUNT"),
@@ -86,7 +152,7 @@ if(isOwnerAccountExisting.isEmailVerified != true){
 
     const pageCount = 15;
 
-    const allCompanies = await companies.findAll()
+    const allCompanies = await companies.find()
       .limit(pageCount)
       .skip(pageCount * (page - 1))
       .exec();

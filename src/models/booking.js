@@ -7,6 +7,11 @@ const bookingCollection = new mongoose.Schema(
         unique: true,
         required: [true, "sender must have id"],
       },
+
+      driverAuthId: {
+        type: String,
+        required: [true, "Driver id must be provided"],
+      },
       driverId: {
         type: String,
         required: [true, "driver must have id"],

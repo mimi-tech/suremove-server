@@ -12,7 +12,7 @@ const yearly = new mongoose.Schema(
         required: [true, "Yearly must be provided"],
       },
 
-      companyID:{
+      companyId:{
         type: String,
         required: [true, "company Id must be provided"],
       }

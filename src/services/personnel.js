@@ -3,6 +3,7 @@
 const { constants } = require("../configs");
 const { personnel,usersAccount } = require("../models");
 const { generalHelperFunctions } = require("../helpers");
+const { EmailService } = require("../helpers/emailService");
 
 /**
  * for creating company account
@@ -12,14 +13,14 @@ const { generalHelperFunctions } = require("../helpers");
 
  const createPersonnel = async (params) => {
   try {
-    const {companyInfo, email } = params;
+    const {companyInfo, personnelEmail, companyId} = params;
     const keyCode = generalHelperFunctions.generateKey();
     const dateAndTime = generalHelperFunctions.generateDateTime();
     
-
+  
     //check if the personnel is already existing
     const isPersonnelExisting = await personnel.findOne({
-      email: email,
+      email: personnelEmail,
     });
 
     if (isPersonnelExisting) {
@@ -31,7 +32,7 @@ const { generalHelperFunctions } = require("../helpers");
     
     //check if personnel has an account
     const isPersonnelAccountExisting = await usersAccount.findOne({
-        email: email,
+        email: personnelEmail,
         isActive:true
       });
   
@@ -48,31 +49,47 @@ const { generalHelperFunctions } = require("../helpers");
             message: "This user email in not verified.",
           };
       }
-      
+      //send key to admin email
+
+      const { status: EmailStatusCode } =
+      await EmailService.sendEmailVerificationCode({
+      user: isPersonnelAccountExisting.email,
+      code: keyCode,
+      name:isPersonnelAccountExisting.firstName
+      });
+
+      if(!EmailStatusCode){
+      return {
+        status: false,
+        message: "Error occured while sending email to the personnel",
+      };
+      }
 
     //go ahead and create personnel account
     await personnel.create({
         personalAuthId:isPersonnelAccountExisting._id,
-        email:email,
+        email:personnelEmail,
         profileImageUrl:isPersonnelAccountExisting.profileImageUrl,
         username:isPersonnelAccountExisting.username,
         firstName:isPersonnelAccountExisting.firstName,
         lastName:isPersonnelAccountExisting.lastName,
         companyInfo:companyInfo,
         key:keyCode,
-        issuedDate:dateAndTime
+        companyId:companyId
+        //issuedDate:dateAndTime
     });
 
-    //send key to admin email
-
+    
     isPersonnelAccountExisting.whoAreYou = "admin";
     isPersonnelAccountExisting.save();
 
     return {
+      key:keyCode,
       status: true,
       message: "Personnel account created successfully",
     };
   } catch (e) {
+    console.log(e)
     return {
       status: false,
       message: constants.SERVER_ERROR("CREATING PERSONNEL ACCOUNT"),
@@ -87,14 +104,26 @@ const { generalHelperFunctions } = require("../helpers");
  */
  const getAllPersonnel = async (params) => {
   try {
-    const { page } = params;
+    const { page, companyId} = params;
 
     const pageCount = 15;
 
-    const allPersonnel = await personnel.findAll()
+    if(companyId){
+      const allPersonnel = await personnel.find({companyId: companyId})
       .limit(pageCount)
-      .skip(pageCount * (page - 1))
-      .exec();
+      .skip(pageCount * (page - 1)).sort({ createdAt: "asc" });
+      
+
+    return {
+      status: true,
+      data: allPersonnel,
+    };
+    }
+
+    const allPersonnel = await personnel.find()
+      .limit(pageCount)
+      .skip(pageCount * (page - 1)).sort({ createdAt: "asc" });
+      
 
     return {
       status: true,
@@ -115,8 +144,15 @@ const { generalHelperFunctions } = require("../helpers");
  */
 
 const getAPersonnel = async (params) => {
-  const { personalAuthId, key } = params;
+  const { personalAuthId, key, accountType } = params;
   try {
+    //check if user is an admin
+    if(accountType !== "admin"){
+      return {
+        status: false,
+        message: "You don't have permission",
+      };
+    }
     const personnels = await personnel.findOne({ personalAuthId: personalAuthId });
 
     if (!personnels) {
@@ -135,14 +171,15 @@ const getAPersonnel = async (params) => {
 
     if(personnels.isKeyUsed === false){
       //check if key have expired
-      const dateAndTime = generalHelperFunctions.generateDateTime();
-      if (dateAndTime.getTime() > personnels.issuedDate.getTime()){
+      const dayLeft = new Date().getDate() - personnels.issuedDate.getDate()
+      if (dayLeft > 2){
+        
         return {
           status: false,
           data: "Your key have expired",
         };
       }
-
+    
     //check if key is correct
     if(key != personnels.key){
       return {
@@ -152,6 +189,9 @@ const getAPersonnel = async (params) => {
     }
      personnels.isKeyUsed = true;
      await personnels.save();
+
+    
+
     return {
       status: true,
       data: "Welcome to the admin",
@@ -244,7 +284,7 @@ const getAPersonnel = async (params) => {
     }
     if(type === "suspend"){
  //go ahead and suspend the account
- personnels.suspended = true;
+ personnels.isActive = false;
  personnels.save();
 
  return {
@@ -254,7 +294,7 @@ const getAPersonnel = async (params) => {
     }
 
      //go ahead and unsuspend the account
-     personnels.isActive = false;
+     personnels.isActive = true;
      personnels.save();
  
      return {
@@ -300,7 +340,7 @@ const getAPersonnel = async (params) => {
     //go ahead and create personnel account
     isPersonnelExisting.key = keyCode;
     isPersonnelExisting.issuedDate = dateAndTime;
-
+    
     isPersonnelExisting.save();
 
 

@@ -20,7 +20,7 @@ module.exports = {
   },
   
   updatePhoneNumber: {
-    phoneNumber: Joi.string().required(),
+    newPhoneNumber: Joi.string().required(),
   },
   
   updateWallet: {
@@ -28,6 +28,9 @@ module.exports = {
       .required()
       .valid("fund", "withdrawal"),
     amount: Joi.number().required(),
+    userAuthId: Joi.string(),
+    userEmail: Joi.string()
+
   },
   
   searchUsers: {

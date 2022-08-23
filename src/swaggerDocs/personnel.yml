@@ -26,7 +26,7 @@ paths:
   /personnel/get-all-personnel:
     get:
       tags:
-        - COMPANY # Value of the tag
+        - PERSONNEL # Value of the tag
       summary: GET ALL PERSONNELS.
       produces:
         - application/json
@@ -42,6 +42,12 @@ paths:
           type: number
           default: 1
           required: true
+
+        - in: query
+          name: companyId
+          type: string
+          default: 05533fe8-3c2d-4b13-8c20-3425754fc050
+          required: true   
 
       responses:
         200:
@@ -73,6 +79,12 @@ paths:
           type: string
           default: 05533fe8-3c2d-4b13-8c20-3425754fc050
           required: false
+
+        - in: query
+          name: accountType
+          type: string
+          default: admin
+          required: true
 
 
       responses:
@@ -170,9 +182,13 @@ definitions: # Schema definition for request body
   createPersonnel:
     type: object
     properties:
-      email:
+      personnelEmail:
         type: string
-        default: ada@gmail.com  
+        default: ada@gmail.com
+        
+      companyId:
+        type: string
+        default: 61dcba2f975d5458b6164f01  
 
       companyInfo:
         type: object

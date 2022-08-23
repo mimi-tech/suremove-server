@@ -6,6 +6,7 @@ const admin = require("firebase-admin");
 const { constants } = require("../configs");
 const { usersAccount,drivers,companies,personnel,history,refeeral  } = require("../models");
 const { generalHelperFunctions } = require("../helpers");
+const { EmailService } = require("../helpers/emailService");
 
 /**
  * for deleting an account using the users ID
@@ -131,26 +132,21 @@ const { generalHelperFunctions } = require("../helpers");
 
     const pageCount = 15;
 
-    const allUsers = await usersAccount.findAll()
+    const allUsers = await usersAccount.find()
       .limit(pageCount)
       .skip(pageCount * (page - 1))
-      .exec();
+      .sort({ createdAt: "asc" });
 
-      const publicData = {
-        id: allUsers._id,
-        isEmailVerified: allUsers.isEmailVerified,
-        phoneNumber: allUsers.phoneNumber,
-        username: allUsers.username,
-        profileImageUrl: allUsers.profileImageUrl,
-        firstName: allUsers.firstName,
-        lastName: allUsers.lastName,
-        gender: allUsers.gender,
-        referralCount: allUsers.referralCount
+     if(allUsers){
+      return {
+        status: true,
+        data: allUsers,
       };
+     }
 
     return {
-      status: true,
-      data: publicData,
+      status: false,
+      message:"Couldn't find any users",
     };
   } catch (e) {
     return {
@@ -169,10 +165,9 @@ const { generalHelperFunctions } = require("../helpers");
 const getAUser = async (params) => {
   const { authId,email } = params;
   try {
-    const user = await usersAccount.findOne({ 
-      email: email,
-      $or:  { _id:authId },
-    });
+    const user = await usersAccount.findOne(
+      { $or: [{ email: email }, { _id:authId }] });
+
     if (!user) {
       return {
         status: false,
@@ -187,12 +182,13 @@ const publicData = {
   isEmailVerified: user.isEmailVerified,
   phoneNumber: user.phoneNumber,
   username: user.username,
-  profileImageUrl: newuserUserAccount.profileImageUrl,
+  profileImageUrl: user.profileImageUrl,
   firstName: user.firstName,
   lastName: user.lastName,
   gender: user.gender,
   walletBalance: user.walletBalance,
-  referralCount: user.referralCount
+  referralCount: user.referralCount,
+  whoAreYou: user.whoAreYou,
 };
     return {
       status: true,
@@ -201,7 +197,7 @@ const publicData = {
   } catch (e) {
     return {
       status: false,
-      message: constants.SERVER_ERROR("CHURCH ACCOUNT GETTING A USER"),
+      message: constants.SERVER_ERROR("GETTING A USER"),
     };
   }
 };
@@ -215,12 +211,12 @@ const publicData = {
 
  const updatePhoneNumber = async (params) => {
   try {
-    const { phoneNumber, authId } = params;
+    const { newPhoneNumber, authId } = params;
 
     //check if phone number exist in the database
 
     const isPhoneNumberExisting = await usersAccount.findOne({
-      phoneNumber: phoneNumber,
+      phoneNumber: newPhoneNumber,
     });
 
     if (isPhoneNumberExisting) {
@@ -235,7 +231,7 @@ const publicData = {
     await usersAccount.updateOne(
       { id: authId },
       {
-        phoneNumber: phoneNumber,
+        phoneNumber: newPhoneNumber,
       }
     );
 
@@ -259,28 +255,27 @@ const publicData = {
 
  const updateWallet = async (params) => {
   try {
-    const { amount, authId, type } = params;
+    const { amount, userAuthId, type, userEmail } = params;
 
     //check if user exist in the database
+    const isUserExisting = await usersAccount.findOne(
+      { $or: [{ _id: userAuthId, }, { email:userEmail }] });
 
-    const isUserExisting = await usersAccount.findOne({
-      _id: authId,
-      isActive:true
-    });
-
-    if (isUserExisting) {
+    if (!isUserExisting) {
       return {
         status: false,
         message: "Account is not existing.",
       };
     }
    if(type === "fund"){
-    isUserExisting.walletBalance += amount;
+    
+    isUserExisting.walletBalance = amount + isUserExisting.walletBalance;
+    
     await isUserExisting.save();
 
     //check if a user is also a driver
     if(isUserExisting.whoAreYou === "driver"){
-      const filter = { authId: authId };
+      const filter = { authId: userAuthId };
       const newAmount = isUserExisting.walletBalance + amount
       await drivers.findOneAndUpdate(
         filter,
@@ -296,7 +291,7 @@ const publicData = {
       amount: amount,
       sign:"+",
       transaction:"Fund",
-      authId: authId,
+      authId: userAuthId,
       date:new Date().toLocaleString()
 
     })
@@ -326,7 +321,7 @@ const publicData = {
 
    //check if a user is also a driver
    if(isUserExisting.whoAreYou === "driver"){
-    const filter = { authId: authId };
+    const filter = { authId: userAuthId };
     const newAmount = isUserExisting.walletBalance - amount
     await drivers.findOneAndUpdate(
       filter,
@@ -342,7 +337,7 @@ const publicData = {
     amount: amount,
     sign:"-",
     transaction:"Withdrawal",
-    authId: authId,
+    authId: userAuthId,
     date:new Date().toLocaleString()
 
   })
@@ -361,6 +356,7 @@ const publicData = {
 
     
   } catch (error) {
+    
     return {
       status: false,
       message: constants.SERVER_ERROR("UPDATE WALLET"),
@@ -451,6 +447,7 @@ const publicData = {
     }
    
   } catch (e) {
+    console.log(e)
     return {
       status: false,
       message: constants.SERVER_ERROR("SENDING EMAIL CODE"),
@@ -511,7 +508,7 @@ const publicData = {
     const allTransactions = await history.find({authId:authId})
       .limit(pageCount)
       .skip(pageCount * (page - 1))
-      .exec();
+      .sort({ date: "desc" });
 
     if(allTransactions){
       return {

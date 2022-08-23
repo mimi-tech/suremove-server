@@ -5,7 +5,8 @@ const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
 const { constants } = require("../configs");
 const { usersAccount,drivers,personnel,history,refeeral } = require("../models");
-
+const { generalHelperFunctions } = require("../helpers");
+const { EmailService } = require("../helpers/emailService");
 /**
  * Display welcome text
  * @param {Object} params  no params.
@@ -77,20 +78,20 @@ const welcomeText = async () => {
     const hashedPassword = await bcrypt.hash(password, 10);
     
    //check if user is uploading image
-   if(profileImageUrl){
-    const {status: getUploadStatus,  message: getUploadMessage, data:result } = await request(
-      `${process.env.EAZYMOVE_UPLOAD_FILE}/upload-file`,
-      "post",body
-    );
+  //  if(profileImageUrl){
+  //   const {status: getUploadStatus,  message: getUploadMessage, data:result } = await request(
+  //     `${process.env.EAZYMOVE_UPLOAD_FILE}/upload-file`,
+  //     "post",body
+  //   );
     
-    if (getUploadStatus === false) {
-      return {
-        status: getUploadStatus,
-        message: getUploadMessage,
-      };
-    }
-    data = result;
-   }
+  //   if (getUploadStatus === false) {
+  //     return {
+  //       status: getUploadStatus,
+  //       message: getUploadMessage,
+  //     };
+  //   }
+  //   data = result;
+  //  }
    let referralUsername;
    if(referralId){
      //check if user name is already registered
@@ -206,7 +207,7 @@ const generalLogin = async (params) => {
 
     //extract and store existing encrypted user password
     const existingUserPassword = userExist.password;
-    console.log(existingUserPassword);
+    
     //validate incoming user password with existing password
     const isPasswordCorrect = await bcrypt.compare(
       password,
@@ -242,12 +243,25 @@ const generalLogin = async (params) => {
     const accessToken = jwt.sign(serializeUserDetails, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN,
     });
-
+    const publicData = {
+      id: userExist._id,
+      email: userExist.email,
+      isEmailVerified: userExist.isEmailVerified,
+      phoneNumber: userExist.phoneNumber,
+      username: userExist.username,
+      profileImageUrl: userExist.profileImageUrl,
+      firstName: userExist.firstName,
+      lastName: userExist.lastName,
+      gender: userExist.gender,
+      walletBalance: userExist.walletBalance,
+      referralCount: userExist.referralCount,
+      whoAreYou: userExist.whoAreYou,
+    };
     return {
       status: true,
       message: "success",
       token: accessToken,
-      data: serializeUserDetails,
+      data: publicData,
     };
   } catch (error) {
     return {
@@ -351,22 +365,32 @@ const generalLogin = async (params) => {
       };
     }
 
-    // If email is existing; update new email code in the database for this user
 
-    const filter = { email: email };
-    const update = { emailCode: emailCode };
-    await usersAccount.findOneAndUpdate(filter, update, {
-      new: true,
+    //send emailCode to user email
+    const { status: EmailStatusCode } =
+    await EmailService.sendEmailVerificationCode({
+    user: isEmailExisting.email,
+    code: emailCode,
+    name:isEmailExisting.firstName
     });
+  
+    if(EmailStatusCode){
+      // If email is existing; update new email code in the database for this user
+      isEmailExisting.emailCode = emailCode;
+      isEmailExisting.save();
+      return {
+        status: true,
+        code: emailCode,
+        message: "A code has been sent to your email successfully",
+      };
+    }
 
-    //send emailCode to user's email
+    
     
 
     return {
-      status: true,
-      EmailStatusCode: EmailStatusCode,
-      message:
-        "We have sent a code to your email. Please enter the code correctly.",
+      status: false,
+      message:"We couldn't send mail to your email. Please try again",
     };
   } catch (error) {
     return {
@@ -474,14 +498,16 @@ const updatePassword = async (params) => {
     accountToUpdate.profileImageUrl = (dataParams.profileImageUrl != undefined) ? dataParams.profileImageUrl : accountToUpdate.profileImageUrl;
     accountToUpdate.firstName = (dataParams.firstName != undefined) ? dataParams.firstName : accountToUpdate.firstName;
     accountToUpdate.lastName = (dataParams.lastName != undefined) ? dataParams.lastName : accountToUpdate.lastName;
+    accountToUpdate.whoAreYou = (dataParams.accountType != undefined) ? dataParams.accountType : accountToUpdate.whoAreYou;
 
     if(dataParams.updateUsername != undefined){
       //check if username is already existing",
-      const isUserNameExisting = await usersAccount.findOne({
-        username: dataParams.updateUsername,
-      });
+      
+      const isUserNameExisting = await usersAccount.findOne(
+        { $and: [{ _id: accountToUpdate._id }, { username: dataParams.updateUsername }] });
   
-      if (isUserNameExisting) {
+  
+      if (!isUserNameExisting) {
         return {
           status: false,
           message: "This username is already existing",
@@ -494,11 +520,12 @@ const updatePassword = async (params) => {
 
     if(dataParams.updateEmail != undefined){
       //check if email is already existing",
-      const isEmailExisting = await usersAccount.findOne({
-        email: dataParams.updateEmail,
-      });
+
+      const isEmailExisting = await usersAccount.findOne(
+        { $and: [{ _id: accountToUpdate._id }, {  email: dataParams.updateEmail }] });
   
-      if (isEmailExisting) {
+  
+      if (!isEmailExisting) {
         return {
           status: false,
           message: "This email is already existing",
@@ -570,3 +597,53 @@ module.exports = {
   updateAccountData,
  
 };
+
+
+// {
+//   "sourceLatitude": 5.5276,
+//   "sourceLogitude": 7.0633,
+//   "destinationLatitude": 5.79565,
+//   "destinationLogitude": 7.03513,
+//   "sourceAddress":"No 4b Amadi street Amakaohia",
+//   "destinationAddress":"No 8a Oliver street Orji",
+//   "driverId": "63029739eaa10e7942ff2dc5",
+//   "driverInfo": {
+//     "id": "63029739eaa10e7942ff2dc5",
+//     "name": "Nnamdi John",
+//     "profilePicture": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTywiWn38XSbvbDg4LgTT9orTjYy_CoWV90ZA&usqp=CAU",
+//     "phoneNumber": "23488378373",
+//     "gender": "Male"
+//   },
+//   "sender": {
+//     "id": "6303465b7645bc355b3eea5e",
+//     "name": "Kelvin Jane",
+//     "profilePicture": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmZgywS7kBZLgz98cUMyFKSBLadef2gJxl9jNRXjI2pTguXCOHnVV9SIUgwp108plhtvQ&usqp=CAU",
+//     "phoneNumber": "234808473473",
+//     "gender": "Female",
+//     "address": "Barcelona Spain"
+//   },
+//   "receiver": {
+//     "name": "Monday",
+//     "profilePicture": "Kenneth",
+//     "phoneNumber": "234847834738",
+//     "gender": "Male",
+//     "address": "Barcelona Spain"
+//   },
+//   "item": {
+//     "size": "16kg",
+//     "number": 1,
+//     "name": "mangoes"
+//   },
+//   "totalAmount": 76767,
+//   "amount":8283,
+//   "distance": 777,
+//   "timeTaken": "8mins",
+//   "country": "Nigeria",
+//   "state": "Imo",
+//   "methodOfPayment": "wallet",
+//   "companyDetails": {
+//     "id": "62ff5f4cc2b222f6cbfbdc47",
+//     "name": "sureMove",
+//     "owner": true
+//   }
+// }

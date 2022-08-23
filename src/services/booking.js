@@ -15,7 +15,7 @@ const {bookingCollection,
    monthly,
    weekly,
    daily,
-   awaitingBooking
+   awaitingBooking,companies
   
   } = require("../models");
 const { updateWallet} = require("./users");
@@ -72,7 +72,7 @@ const db = admin.firestore();
   
       if (isUserExisting) {
         
-        const filter = { authId: authId };
+        const filter = { customerAuthId: authId };
       
      const addBooking = await bookingCollection.findOneAndUpdate(filter, {
         year:year,
@@ -81,6 +81,10 @@ const db = admin.firestore();
       day:day,
       monthName:monthName,
       customerAuthId:authId,
+      cancelBooking:false,
+      ongoing:true,
+      isPaymentSuccessful:false,
+      confirmDelivery:false,
         ...dataToUpload}, {
         new: true,
       });
@@ -95,16 +99,17 @@ const db = admin.firestore();
     const data = {
       connect: true,
       customerId:dataToUpload.sender.id,
-      bookingId:addBooking.id
+      bookingId:addBooking._id
     }
     
-    const res = await db.collection('drivers').doc(dataToUpload.driverInfo.id).set(data,
-       { merge: true }
-      );
+    const res = await db.collection('drivers').doc(`${dataToUpload.driverId}`).set(JSON.parse(JSON.stringify(data,
+       { merge: true })
+      ));
   
       if(res){
         return {
           status: true,
+          data:addBooking,
           message: "Booking details saved successfully",
         };
       }
@@ -118,6 +123,7 @@ const db = admin.firestore();
       week:week,
       day:day,
       monthName:monthName,
+      customerAuthId:authId,
       ...dataToUpload});
 
 
@@ -130,9 +136,9 @@ const db = admin.firestore();
       accept:false
     }
     
-    const res = await db.collection('drivers').doc(dataToUpload.driverInfo.id).set(data,
+    const res = await db.collection('drivers').doc(`${dataToUpload.driverId}`).set(JSON.parse(JSON.stringify(data,
        { merge: true }
-      );
+      )));
   
       if(res){
         return {
@@ -144,6 +150,7 @@ const db = admin.firestore();
        
       
   } catch (e) {
+    console.log(e);
     return {
       status: false,
       message: constants.SERVER_ERROR("CREATING BOOKING APP ACCOUNT"),
@@ -161,9 +168,9 @@ const db = admin.firestore();
  const updateBooking = async (params) => {
   try {
     const { authId, bookingId, ...dataToUpdate} = params;
-    const filter = {
-      _id: bookingId,
-      $or:  { customerAuthId:authId }};
+    
+      
+    const filter = { $or: [{ _id: bookingId }, { customerAuthId:authId }] };
       
     const updateBooking = await bookingCollection.findOneAndUpdate(filter, {
        ...dataToUpdate}, {
@@ -184,6 +191,7 @@ const db = admin.firestore();
     };
 
   }catch(e){
+    console.log(e)
     return {
       status: false,
       message: constants.SERVER_ERROR("UPDATING BOOKING"),
@@ -199,11 +207,11 @@ const db = admin.firestore();
 
  const cancelBooking = async (params) => {
     try {
-      const { authId, customerInfo, driverInfo, message } = params;
+      const { authId, message } = params;
   
       //check if booking collection is existing
       const isBookingExisting = await bookingCollection.findOne({
-        authId: authId,
+        customerAuthId: authId,
       });
   
       if (isBookingExisting) {
@@ -211,6 +219,28 @@ const db = admin.firestore();
         isBookingExisting.ongoing = false;
         isBookingExisting.cancelBooking = true;
         isBookingExisting.save();
+        
+        const customerInfo = {
+          id:isBookingExisting.sender.id,
+          name:isBookingExisting.sender.name,
+          profilePicture:isBookingExisting.sender.profilePicture ,
+          phoneNumber:isBookingExisting.sender.phoneNumber,
+          gender:isBookingExisting.sender.gender,
+          address:isBookingExisting.sender.address,
+
+        }
+
+        const driverInfo = {
+          id:isBookingExisting.driverInfo.id,
+          name:isBookingExisting.driverInfo.name,
+          profilePicture:isBookingExisting.driverInfo.profilePicture ,
+          phoneNumber:isBookingExisting.driverInfo.phoneNumber,
+          gender:isBookingExisting.driverInfo.gender,
+          companyId: isBookingExisting.companyDetails.id,
+          companyName: isBookingExisting.companyDetails.name,
+          companyOwner: isBookingExisting.companyDetails.owner
+
+        }
 
         await cancelledBooking.create({
             customerInfo:customerInfo,
@@ -219,19 +249,23 @@ const db = admin.firestore();
         });
 
          //This will let the driver to know that booking has been cancelled by the customer
-//Update the user collection isOngoingBooking to true
-const filter = { authId: authId };
-await usersAccount.findOneAndUpdate(filter, {isOngoingBooking:false}, {
- new: true,
-});
+        //Update the user collection isOngoingBooking to true
+        const filter = { _id: authId };
+        await usersAccount.findOneAndUpdate(filter, {isOngoingBooking:false}, {
+        new: true,
+        });
+
+       
+
      const data = {
       connect: false,
-      cancel:true
+      cancel:true,
+      accept: false,
+      transit:false,
+      customerId:""
     }
     
-    await db.collection('drivers').doc(driverInfo.id).set(data,
-       { merge: true }
-      );
+    await db.collection('drivers').doc(`${driverInfo.id}`).update(JSON.parse(JSON.stringify(data)));
    
         return {
           status: false,
@@ -264,7 +298,7 @@ await usersAccount.findOneAndUpdate(filter, {isOngoingBooking:false}, {
 
     const pageCount = 15;
 
-    const allBookings = await bookingCollection.findAll()
+    const allBookings = await bookingCollection.find()
       .limit(pageCount)
       .skip(pageCount * (page - 1))
       .exec();
@@ -290,10 +324,8 @@ await usersAccount.findOneAndUpdate(filter, {isOngoingBooking:false}, {
 const getABooking = async (params) => {
   const { bookingId,customerId } = params;
   try {
-    const booking = await bookingCollection.findOne({ 
-      _id: bookingId,
-      $or:  { customerAuthId:customerId },
-    });
+    const booking = await bookingCollection.findOne(
+      { $or: [{ _id: bookingId }, {customerAuthId:customerId }] });
 
     if (!booking) {
       return {
@@ -321,9 +353,10 @@ const getABooking = async (params) => {
  */
 
  const customerConfirmBooking = async (params) => {
-  const { authId, bookingId, ...analysisData } = params;
+  const { authId, bookingId } = params;
   try {
-    const booking = await bookingCollection.findOne({ _id: bookingId });
+    const booking = await bookingCollection.findOne(
+      { $or: [{ _id: bookingId}, { customerAuth:authId }] });
 
     if (!booking) {
       return {
@@ -337,66 +370,96 @@ const getABooking = async (params) => {
     booking.save();
 
     let ownerAmount;
-    let partnersAmount;
+    let partnersAmount ;
     let contributorAmount;
     let driversAmount;
-    let totalAmount = distance * 100;
+   
     //share percentages
-
      if(booking.companyDetails.owner === true){
+      
       if(booking.methodOfPayment === "cash"){
-        ownerAmount = 20/100 * totalAmount;
+        
+        ownerAmount = 20/100 * booking.totalAmount;
         partnersAmount = 0;
-        contributorAmount = 10/100 * totalAmount;
-        driversAmount = 70/100 * totalAmount;
+        contributorAmount = 10/100 * booking.totalAmount;
+        driversAmount =  70/100 * booking.totalAmount;
+       
       }else{
-        ownerAmount = 60/100 * totalAmount;
+        ownerAmount = 20/100 * booking.totalAmount;
         partnersAmount = 0;
-        contributorAmount = 10/100 * totalAmount;
-        driversAmount = 30/100 * totalAmount;
+        contributorAmount = 10/100 * booking.totalAmount;
+        driversAmount = 70/100 * booking.totalAmount;
       }
      
      }else{
-
+      
       if(booking.methodOfPayment === "cash"){
-        ownerAmount = 10/100 * totalAmount;
-        partnersAmount = 20/100 * totalAmount;
-        contributorAmount = 10/100 * totalAmount;
-        driversAmount = 60/100 * totalAmount; 
+        ownerAmount = 10/100 * booking.totalAmount;
+        partnersAmount = 20/100 * booking.totalAmount;
+        contributorAmount = 10/100 * booking.totalAmount;
+        driversAmount = 60/100 * booking.totalAmount; 
       }else{
-        ownerAmount = 10/100 * totalAmount;
-        partnersAmount = 20/100 * totalAmount;
-        contributorAmount = 10/100 * totalAmount;
-        driversAmount = 60/100 * totalAmount; 
+        ownerAmount = 10/100 * booking.totalAmount;
+        partnersAmount = 20/100 * booking.totalAmount;
+        contributorAmount = 10/100 * booking.totalAmount;
+        driversAmount = 60/100 * booking.totalAmount; 
       }
 
        
      }
 
+    //get owner and contributor id
+    const secretRef = db.collection('secret').doc("Pnf7UykV4bWxDWLCaBwK");
+    const doc = await secretRef.get();
+    if (!doc.exists) {
+      return {
+        status: false,
+        message: "An error occurred getting owner and contributor",
+      };
+    } 
+
+    //get the company authId
+    const companyDetails = await companies.findOne({ _id:booking.companyDetails.id })
+
+    if(!companyDetails){
+      return {
+        status: false,
+        message: "An error occurred getting company information",
+      }; 
+    }
+  
+    
+    
+
     //check the method of payment
     if(booking.methodOfPayment === "cash"){
+       
+
       //Take the amount from driver account
-      const body = { amount:analysisData.amount, authId:analysisData.driverId, type:"withdrawal" };
+      const body = { amount:booking.totalAmount, userAuthId:booking.driverAuthId, type:"withdrawal" };
       const data = await updateWallet(body);
       if (data.status === false) {
+        console.log("sjbdjwhdbwjhbd");
         return {
           status: false,
-          message: "Insufficient fund found",
+          message: data.message,
         };
       }
 
     //Fund the owner account
-    const ownerBody = { amount:ownerAmount, authId:analysisData.ownerId, type:"fund" };
+    const ownerBody = { amount:ownerAmount, userAuthId:doc.data().ownerId, type:"fund" };
     const ownerData = await updateWallet(ownerBody);
     if (ownerData.status === false) {
+      console.log("ppppppp")
+      console.log(ownerData.message)
       return {
         status: false,
-        message: "An error occurred while updating owner's ccount",
+        message: ownerData.message,
       };
     }
 
-    //Fund the partner contributor account
-    const partnerBody = { amount:partnersAmount, authId:analysisData.companyId, type:"fund" };
+    //Fund the partner account
+    const partnerBody = { amount:partnersAmount, userAuthId:companyDetails.ownerId, type:"fund" };
     const partnerData = await updateWallet(partnerBody);
     if (partnerData.status === false) {
       return {
@@ -406,7 +469,7 @@ const getABooking = async (params) => {
     }
 
     //Fund the contributor account
-    const contributorsBody = { amount:contributorAmount, authId:analysisData.contributorId, type:"fund" };
+    const contributorsBody = { amount:contributorAmount, userAuthId:doc.data().contributorId, type:"fund" };
     const contributorsData = await updateWallet(contributorsBody);
     if (contributorsData.status === false) {
       return {
@@ -417,7 +480,7 @@ const getABooking = async (params) => {
 
   }else{
      //Take the money from customer wallet
-  const body = { amount:analysisData.amount, authId:analysisData.customerAuthId, type:"withdrawal" };
+  const body = { amount:booking.totalAmount, userAuthId:booking.customerAuthId, type:"withdrawal" };
   const data = await updateWallet(body);
   if (data.status === false) {
     return {
@@ -427,7 +490,7 @@ const getABooking = async (params) => {
   }
 
   //Fund the owner account
-  const ownerBody = { amount:ownerAmount, authId:analysisData.ownerId, type:"fund" };
+  const ownerBody = { amount:ownerAmount, userAuthId:doc.data().ownerId, type:"fund" };
   const ownerData = await updateWallet(ownerBody);
   if (ownerData.status === false) {
     return {
@@ -437,7 +500,7 @@ const getABooking = async (params) => {
   }
 
   //Fund the partner account
-  const partnerBody = { amount:partnersAmount, authId:analysisData.companyId, type:"fund" };
+  const partnerBody = { amount:partnersAmount, userAuthId:companyDetails.ownerId, type:"fund" };
   const partnerData = await updateWallet(partnerBody);
   if (partnerData.status === false) {
     return {
@@ -447,7 +510,7 @@ const getABooking = async (params) => {
   }
 
   //Fund the contributor account
-  const contributorsBody = { amount:contributorAmount, authId:analysisData.contributorId, type:"fund" };
+  const contributorsBody = { amount:contributorAmount, userAuthId:doc.data().contributorId, type:"fund" };
   const contributorsData = await updateWallet(contributorsBody);
   if (contributorsData.status === false) {
     return {
@@ -457,7 +520,7 @@ const getABooking = async (params) => {
   }
 
   //Fund the contributor account
-  const driverBody = { amount:driversAmount, authId:analysisData.driverId, type:"fund" };
+  const driverBody = { amount:driversAmount, userAuthId:booking.driverAuthId, type:"fund" };
   const driverData = await updateWallet(driverBody);
   if (driverData.status === false) {
     return {
@@ -477,39 +540,69 @@ const getABooking = async (params) => {
 
 
   const saveAnalysis = await bookingAnalysis.create({
-    ownerAmount:ownerAmount,
-    driversAmount:driversAmount,
-    partnersAmount:partnersAmount,
-    contributorAmount:contributorAmount,
-    authId:authId,
+    sourceAddress: booking.sourceAddress,
+    destinationAddress: booking.destinationAddress,
+    item: booking.item,
+    driverId: booking.driverId,
+    receiver: booking.receiver,
+    sender: booking.sender,
+    driverInfo: booking.driverInfo,
+    sender: booking.sender,
+    methodOfPayment: booking.methodOfPayment,
+    companyDetails: booking.companyDetails,
+    totalAmount: booking.totalAmount,
+    distance: booking.distance,
+    timeTaken: booking.timeTaken,
+    country: booking.country,
+    state: booking.state,
+    customerAuthId:authId,
     year: year,
     month: month,
     week: week,
     day: day,
     monthName:monthName,
-    ...dataToUpload});
+    companyId:booking.companyDetails.id,
+    distance: booking.distance,
+    ownerId:doc.data().ownerId,
+    contributorId:doc.data().contributorId,
+    ownerAmount:ownerAmount,
+    driversAmount:driversAmount,
+    partnersAmount: partnersAmount,
+    contributorAmount:contributorAmount,
+    
+  });
 
-     //Update the user collection isOngoingBooking to true
-     const filter = { authId: authId };
+     //Update the user collection isOngoingBooking to false
+     const filter = { _id: authId };
      await usersAccount.findOneAndUpdate(filter, {isOngoingBooking:false}, {
       new: true,
     });
+//update the driver collection in firebase that customer have confirm delivery
+const data = { 
+  confirm:true
+}
+await db.collection('drivers').doc(`${booking.driverId}`).update(JSON.parse(JSON.stringify(data)));
+
+    
+ 
     if(saveAnalysis){
       return {
         status: true,
         message: "Successful",
+        data:saveAnalysis
       };
     }
- 
+    
     return {
       status: false,
       message: "Error creating analysis account",
     };
     
   } catch (e) {
+    
     return {
       status: false,
-      message: constants.SERVER_ERROR("COUSTOMER CONFIRMING BOOKING"),
+      message: constants.SERVER_ERROR("CUSTOMER CONFIRMING BOOKING"),
     };
   }
 };
@@ -522,7 +615,7 @@ const getABooking = async (params) => {
  */
 
  const driverConfirmBooking = async (params) => {
-  const { authId,companyId } = params;
+  const { authId,companyId,driverId } = params;
   try {
     
     const year = generalHelperFunctions.generateYear();
@@ -533,8 +626,9 @@ const getABooking = async (params) => {
 
 
  //Update the user collection isOngoingBooking to true
- const filter = { authId: authId };
- await usersAccount.findOneAndUpdate(filter, {isOngoingBooking:false}, {
+ const filter = { _id: driverId };
+ const userFilter = { _id: authId };
+ await usersAccount.findOneAndUpdate(userFilter, {isOngoingBooking:false}, {
   new: true,
 });
 
@@ -542,18 +636,18 @@ const data = {
   accept: false,
   reject:false,
   connect:false,
-  transit:false
+  transit:false,
+  confirm:false
 }
 
 
-await db.collection('drivers').doc(authId).set(data,
-   { merge: true }
-  );
+await db.collection('drivers').doc(driverId).update(JSON.parse(JSON.stringify(data)));
 
 
-  const isDriver = await drivers.findOne({ authId: authId});
+  const isDriver = await drivers.findOne({ _id: driverId});
 
   if(isDriver) {
+    
     isDriver.year === year?isDriver.yearlyCount += 1:1
     isDriver.month === month?isDriver.monthlyCount += 1:1
     isDriver.week === week?isDriver.weeklyCount += 1:1
@@ -624,7 +718,7 @@ if(isDailyAnalysis){
 
    const driverDetails = await drivers.findOneAndUpdate(filter,
     {
-      onTransit:true,
+      onTransit:false,
       year: year,
       month: month,
       week: week,
@@ -649,6 +743,7 @@ if(isDailyAnalysis){
   
 
   } catch (e) {
+    console.log(e)
     return {
       status: false,
       message: constants.SERVER_ERROR("DRIVER CONFIRMING BOOKING"),
@@ -731,9 +826,9 @@ if(isDailyAnalysis){
   try {
     const kiloMeter = 100;
     const loadPrize = 100;
-    const loadCost = 0;
-    const speed = 0;
-    const finalCost = 0;
+    let loadCost = 0;
+    let speed = 0;
+    let finalCost = 0;
     if(itemSize > 10){
       loadCost = itemNumber * loadPrize;
     
@@ -745,6 +840,7 @@ if(isDailyAnalysis){
       data:finalCost
     };
   } catch (e) {
+    
     return {
       status: false,
       message: constants.SERVER_ERROR("CALCULATING BOOKING COST"),

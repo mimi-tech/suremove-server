@@ -21,7 +21,7 @@ const monthly = new mongoose.Schema(
         required: [true, "Year number must be provided"],
       },
 
-      companyID:{
+      companyId:{
         type: String,
         required: [true, "company Id must be provided"],
       }

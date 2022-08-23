@@ -2,21 +2,25 @@ const Joi = require("joi");
 
 module.exports = {
     createPersonnel: {
-    email: Joi.string().required(),
+      personnelEmail: Joi.string().required(),
     companyInfo:Joi.object({
         id: Joi.string().required(),
         name: Joi.string().required(),
         address: Joi.string().required(),
     }).required(),
+    companyId:Joi.string().required()
   },
   
   getAllPersonnel: {
     page: Joi.number().required(),
+    companyId: Joi.string(),
+   
   },
 
   getAPersonnel: {
     personalAuthId: Joi.string().required(),
     key: Joi.string(),
+    accountType: Joi.string().required(),
   },
   
   deleteAPersonnel: {

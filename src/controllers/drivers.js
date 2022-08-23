@@ -74,6 +74,10 @@ const getAllCompanyRejectedBooking = async (req, res) => {
   const data = await drivers.getAllCompanyRejectedBooking(req.form);
   return response(res, data);
 };
+const getAllDriversRatings = async (req, res) => {
+  const data = await drivers.getAllDriversRatings(req.form);
+  return response(res, data);
+};
 
 module.exports = {
   createDriversAccount,
@@ -90,5 +94,6 @@ module.exports = {
   createRejectedBooking,
   getAllRejectedBooking,
   deleteRejectedBooking,
-  getAllCompanyRejectedBooking
+  getAllCompanyRejectedBooking,
+  getAllDriversRatings
 };

@@ -72,7 +72,7 @@ paths:
           description: should return a company     
 
 
-  /company/delete-account:
+  /company/delete-a-company:
     delete:
       tags:
         - COMPANY # Value of the tag
@@ -97,7 +97,7 @@ paths:
 
 
   /company/suspend-company:
-    delete:
+    put:
       tags:
         - COMPANY # Value of the tag
       summary: SUSPEND COMPANY ACCOUNT
@@ -136,10 +136,7 @@ definitions: # Schema definition for request body
   createCompany:
     type: object
     properties:
-      ownerId:
-        type: string
-        default: 61dcba2f975d5458b6164f01  
-
+      
       companyName:
         type: string
         default: sureMove  
@@ -147,10 +144,6 @@ definitions: # Schema definition for request body
       owner:
         type: boolean
         default: true
-
-      email:
-        type: string
-        default: ada@gmail.com 
 
       address:
         type: string

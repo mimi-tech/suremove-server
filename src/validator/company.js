@@ -6,8 +6,7 @@ module.exports = {
   createCompany: {
     companyName: Joi.string().required(),
     owner: Joi.boolean().required(),
-    ownerId: Joi.string().required(),
-    email: Joi.string().required(),
+    companyEmail: Joi.string(),
     bykeCount: Joi.number().required(),
     address: Joi.string().required(),
   },

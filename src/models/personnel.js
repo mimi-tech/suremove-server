@@ -55,12 +55,21 @@ const personnel = new mongoose.Schema(
       
       issuedDate:{
         type: Date,
-        required: [true, "key issued date is required"],
+        default:new Date()
       },
 
       isActive: {
         type: Boolean,
         default:true
+      },
+
+      createdAt: {
+        type: Date,
+        default: new Date()
+      },
+      
+      companyId: {
+        type: String,
       }
   },
   {

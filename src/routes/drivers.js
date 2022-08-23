@@ -88,10 +88,16 @@ routes.delete(
   drivers.deleteRejectedBooking
 );
 
-routes.delete(
+routes.get(
   "/get-company-rejected-booking",
   validate(validator.getAllCompanyRejectedBooking),
   drivers.getAllCompanyRejectedBooking
+);
+
+routes.get(
+  "/get-rating",
+  validate(validator.getAllDriversRatings),
+  drivers.getAllDriversRatings
 );
 
 

@@ -4,7 +4,7 @@ module.exports = {
   softMoveAccountRegistration: {
     email: Joi.string().required(),
     password: Joi.string().required(),
-    profileImageUrl: Joi.string().required(),
+    profileImageUrl: Joi.string(),
     username: Joi.string().lowercase({ force: true }).required(),
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
@@ -47,8 +47,9 @@ module.exports = {
     profileImageUrl: Joi.string(),
     firstName: Joi.string(),
     lastName: Joi.string(),
-    gender: Joi.string()
-      .valid("Male", "Female"),
+    gender: Joi.string().valid("Male", "Female"),
+    accountType: Joi.string()
+      .valid("customer", "driver","company","admin","contributor","owner"),
   },
   
   sendEmailVerificationCode: { },

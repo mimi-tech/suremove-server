@@ -91,6 +91,11 @@ const usersAccount = new mongoose.Schema(
     isOngoingBooking: {
       type: Boolean,
       default: false,
+    },
+
+    createdAt: {
+      type: Date,
+      default: new Date()
     }
 
   },

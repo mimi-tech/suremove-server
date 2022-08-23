@@ -24,15 +24,26 @@ const companies = new mongoose.Schema(
         default:false
       },
 
-      ownerID: {
+      ownerId: {
         type: String,
-        required: [true, "Comapny owner ID must be provided"],
+        required: [true, "Comapny owner Id must be provided"],
+
+      },
+
+      email: {
+        type: String,
+        required: [true, "Comapny email must be provided"],
 
       },
 
       suspended: {
         type: Boolean,
         default:false
+      },
+
+      address: {
+        type: String,
+        
       }
   },
   {

@@ -24,6 +24,10 @@ const history = new mongoose.Schema(
       date:{
         type: String,
         required: [true, "Date must be provided"],
+      },
+      createdAt: {
+        type: Date,
+        default: new Date()
       }
   },
   {

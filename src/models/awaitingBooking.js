@@ -2,9 +2,8 @@ const mongoose = require("mongoose");
 
 const awaitingBooking = new mongoose.Schema(
   {
-    authId: {
+    customerAuthId: {
         type: String,
-        unique: true,
         required: [true, "AuthId must be provided"],
       },
 
@@ -33,6 +32,11 @@ const awaitingBooking = new mongoose.Schema(
       item: {
         type: Object,
         required: [true, "Item must be provided"],
+      },
+
+      dateAdded: {
+        type:String,
+        default: new Date().toLocaleString()
       }
   },
   {

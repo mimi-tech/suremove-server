@@ -29,10 +29,10 @@ const generateDateTime = () => {
   var today = new Date();
  
   // get the date and time
-  var now = new Date(today.getFullYear(), nowDate.getMonth(), nowDate.getDate(), nowDate.getHours(), nowDate.getMinutes(), nowDate.getSeconds);
+  //var now = new Date(today.getFullYear(), today.getMonth(), today.getDate(), today.getHours(), today.getMinutes(), today.getSeconds);
 
   //var now = today.toLocaleString();
-  return now;
+  return today;
 };
 
 const generateYear = () => {
@@ -70,6 +70,7 @@ const generateDay = () => {
 
 
 const generateMonthName = () => {
+  const date = new Date();
     return monthNames[date.getMonth()];
 }
 
@@ -86,3 +87,5 @@ module.exports = {
   generateMonthName
 
 };
+
+//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfZW1haWwiOiJtaXJpYW1AZ21haWwuY29tIiwidXNlcm5hbWUiOiJtaW1pIiwiX2lkIjoiNjJmYjVkNjNjZDQ3MDUyN2Y2NWY3ZDA1Iiwid2hvQXJlWW91IjoiY3VzdG9tZXIiLCJpYXQiOjE2NjA4MDg5NzIsImV4cCI6MTY5MjM0NDk3Mn0.r1R8MoajIo1GOAUGYySyDloxKsoexM2v4ciI1HpTYBI

@@ -277,7 +277,7 @@ const getCurrentMonth = async (params) => {
         }
 
         const allBookings = await bookingAnalysis.find({
-            authId:customerId
+            customerAuthId:customerId
         })
           .limit(pageCount)
           .skip(pageCount * (page - 1))
