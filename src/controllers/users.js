@@ -60,6 +60,11 @@ const getUserReferrals = async (req, res) => {
   return response(res, data);
 };
 
+const transferFund = async (req, res) => {
+  const data = await users.transferFund(req.form);
+  return response(res, data);
+};
+
 module.exports = {
   deleteAUser,
   blockAndUnblockUser,
@@ -72,5 +77,6 @@ module.exports = {
   verifyEmailVerificationCode,
   getTransactionHistory,
   deleteATransaction,
-  getUserReferrals
+  getUserReferrals,
+  transferFund
 };

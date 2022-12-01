@@ -86,7 +86,11 @@ routes.get(
   validate(validator.getUserReferrals),
   users.getUserReferrals
 );
-
+routes.post(
+  "/transfer-fund",
+  validate(validator.transferFund),
+  users.transferFund
+);
 
 
 module.exports = routes;

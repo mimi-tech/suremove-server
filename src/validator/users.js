@@ -54,4 +54,10 @@ module.exports = {
     page: Joi.number().required(),
   },
 
+  transferFund: {
+    amount: Joi.number().required(),
+    recipientEmail: Joi.string().required(),
+
+  },
+
 };

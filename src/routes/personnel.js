@@ -42,4 +42,10 @@ routes.put(
   personnel.createPersonnelNewKey
 );
 
+routes.put(
+  "/update-personnel-account",
+  validate(validator.updatePersonnelAccount),
+  personnel.updatePersonnelAccount
+);
+
 module.exports = routes;

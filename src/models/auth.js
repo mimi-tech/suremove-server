@@ -69,6 +69,11 @@ const usersAccount = new mongoose.Schema(
       default: 0.0,
     },
 
+    promoBalance: {
+      type: Number,
+      default: 0.0,
+    },
+
     referralId: {
       type: String,
     },
@@ -86,6 +91,11 @@ const usersAccount = new mongoose.Schema(
     whoAreYou: {
       type: String,
       default: "customer",
+    },
+
+    txnPin: {
+      type: String,
+      required: [true, "user must have transaction pin"],
     },
 
     isOngoingBooking: {

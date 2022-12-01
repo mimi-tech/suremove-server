@@ -30,11 +30,17 @@ const createPersonnelNewKey = async (req, res) => {
   return response(res, data);
 }
 
+const updatePersonnelAccount = async (req, res) => {
+  const data = await personnel.updatePersonnelAccount(req.form);
+  return response(res, data);
+}
+
 module.exports = {
   createPersonnel,
   getAllPersonnel,
   getAPersonnel,
   deleteAPersonnel,
   suspendAPersonnel,
-  createPersonnelNewKey
+  createPersonnelNewKey,
+  updatePersonnelAccount
 };

@@ -48,6 +48,16 @@ const personnel = new mongoose.Schema(
         required: [true, "Key is required"],
       },
 
+      loginTime:{
+        type: String,
+        default:""
+      },
+
+      logoutTime:{
+        type: String,
+        default:""
+      },
+
       isKeyUsed:{
         type: Boolean,
         default:false

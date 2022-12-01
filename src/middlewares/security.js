@@ -75,7 +75,9 @@ const restricted = [
   "/get-user-referral",
   "/calculate-booking-cost",
   "/update-booking",
-  "/get-rating"
+  "/get-rating",
+  "/transfer-fund",
+  "/update-personnel-account"
 
 ];
 const inServiceEndPoints = ["/get-church-user-in-app"];

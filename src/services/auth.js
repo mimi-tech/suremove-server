@@ -35,7 +35,7 @@ const welcomeText = async () => {
   
   try {
     const { email, password, phoneNumber, username,profileImageUrl,
-      firstName,lastName,gender,referralId, whoAreYou
+      firstName,lastName,gender,referralId, whoAreYou, txnPin
     } = params;
      let data = null;
     //check if  account is already registered
@@ -105,7 +105,7 @@ const welcomeText = async () => {
         message: "This refeeral does not exist",
       };
     }
-    referralUsername.walletBalance += 100;
+    referralUsername.promoBalance += 100;
     referralUsername.referralCount +=1;
     await referralUsername.save();
 
@@ -152,7 +152,8 @@ const welcomeText = async () => {
       lastName:lastName,
       gender:gender,
       referralId:!referralUsername ?"":referralUsername._id,
-      whoAreYou:whoAreYou   
+      whoAreYou:whoAreYou,
+      txnPin:txnPin   
     });
   
     

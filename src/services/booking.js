@@ -65,6 +65,24 @@ const db = admin.firestore();
      }
 
 
+     //Check customer method of payment is promo
+     if(dataToUpload.methodOfPayment === "promo"){
+      const isUserExisting = await usersAccount.findOne({
+        _id: authId,
+      });
+  
+      if (isUserExisting) {
+        if(isUserExisting.promoBalance < dataToUpload.totalAmount){
+          return {
+            status: false,
+            message: "Insufficient fund. Please fund your wallet or change to cash for your payment",
+          };
+        }
+        
+      }
+     }
+
+
      //check if user has a booking collection
      const isUserExisting = await bookingCollection.findOne({
         authId: authId,

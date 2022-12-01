@@ -53,7 +53,7 @@ module.exports = {
        
         methodOfPayment: Joi.string()
       .required()
-      .valid("cash", "wallet"),
+      .valid("cash", "wallet","promo"),
         driverId: Joi.string().required(),
         driverAuthId: Joi.string().required()
 

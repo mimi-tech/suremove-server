@@ -37,5 +37,11 @@ module.exports = {
       .required()
       .valid("suspend", "unsuspend"),
 
+  },
+  updatePersonnelAccount:{
+    personnelId: Joi.string().required(),
+    onlineStatus: Joi.boolean().required(),
+    loginTime: Joi.string(),
+    logoutTime: Joi.string()
   }
 };

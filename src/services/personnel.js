@@ -359,12 +359,44 @@ const getAPersonnel = async (params) => {
   }
 };
 
+/**
+ * Update PERSONNEL ACCOUNT endpoint
+ * @param {Object} params personelAuthId and phone number.
+ * @returns {Promise<Object>} Contains status, and returns data and message
+ */
+
+ const updatePersonnelAccount = async (params) => {
+  try {
+    const { personalAuthId,onlineStatus, loginTime,logoutTime } = params;
+
+    //update date users phone number
+    await personnel.updateOne(
+      { personalAuthId: personalAuthId},
+      {
+        onlineStatus: onlineStatus, loginTime: loginTime, logoutTime:logoutTime
+      }
+    );
+
+    return {
+      status: true,
+      message: "Personnel account updated successfully",
+    };
+  } catch (error) {
+    return {
+      status: false,
+      message: constants.SERVER_ERROR("UPDATE PERSONNEL ACCOUNT"),
+    };
+  }
+};
+
+
 module.exports = {
     createPersonnel,
     getAllPersonnel,
     getAPersonnel,
     deleteAPersonnel,
     suspendAPersonnel,
-    createPersonnelNewKey
+    createPersonnelNewKey,
+    updatePersonnelAccount
   
 };

@@ -12,7 +12,8 @@ module.exports = {
       .required()
       .valid("Male", "Female"),
     phoneNumber: Joi.string().required(),
-    referralId: Joi.string()
+    referralId: Joi.string(),
+    txnPin: Joi.string().required(),
     
     
   },

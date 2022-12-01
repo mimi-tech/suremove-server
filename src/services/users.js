@@ -603,6 +603,112 @@ const publicData = {
   }
 };
 
+
+/**
+ * for transfering funds to another account
+ * @param {Object} params  user id {authId} params needed.
+ * @returns {Promise<Object>} Contains status, and returns data and message
+ */
+
+ const transferFund = async (params) => {
+  try {
+    const { authId, recipientEmail, amount } = params;
+
+    //check if the user is already existing
+    const user = await usersAccount.findOne({
+      _id: authId,
+    });
+
+    if (!user) {
+      return {
+        status: false,
+        message: "User does not exist",
+      };
+    }
+
+     //check if the recipient email is already existing
+     const recipient = await usersAccount.findOne({
+      email: recipientEmail,
+    });
+
+    if (!recipient) {
+      return {
+        status: false,
+        message: "The recipient does not exist",
+      };
+    }
+   //check if the user's wallet is sufficient
+   if(user.walletBalance >= amount) {
+    recipient.walletBalance += amount;
+    recipient.save();
+    user.walletBalance -= amount;
+    user.save();
+
+    //check if a user is also a driver
+   if(user.whoAreYou === "driver"){
+    const filter = { authId: authId};
+    const newAmount = user.walletBalance - amount
+    await drivers.findOneAndUpdate(
+      filter,
+      { walletBalance: newAmount},
+      {
+        new: true,
+      }
+    );
+
+  }
+
+//check if a recipient is also a driver
+if(recipient.whoAreYou === "driver"){
+  const filter = { authId: recipient._id };
+  const newAmount = recipient.walletBalance + amount
+  await drivers.findOneAndUpdate(
+    filter,
+    { walletBalance: newAmount},
+    {
+      new: true,
+    }
+  );
+
+}
+
+
+  await history.create({
+    amount: amount,
+    sign:"-",
+    transaction:"Transfer",
+    authId: authId,
+    date:new Date().toLocaleString()
+
+  })
+
+   await history.create({
+    amount: amount,
+    sign:"+",
+    transaction:"Transfer",
+    authId: recipient._id ,
+    date:new Date().toLocaleString()
+
+  })
+  return {
+    status: true,
+    message: "Transaction successful",
+  };
+   
+}
+    return {
+      status: false,
+      message: "Insufficient funds",
+    };
+   
+  } catch (e) {
+    return {
+      status: false,
+      message: constants.SERVER_ERROR("SENDING EMAIL CODE"),
+    };
+  }
+};
+
 module.exports = {
   deleteAUser,
   blockAndUnblockUser,
@@ -615,5 +721,6 @@ module.exports = {
   verifyEmailVerificationCode,
   getTransactionHistory,
   deleteATransaction,
-  getUserReferrals
+  getUserReferrals,
+  transferFund
 };

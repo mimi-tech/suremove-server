@@ -317,6 +317,31 @@ paths:
           description: should return user refeerals successful
 
 
+  /users/transfer-fund:
+    post:
+      tags: # Tag property
+        - USERS # Value of the tag
+      summary: FOR TRANSFERING FUNDS
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-
+
+        - in: body # request body
+          name: trnsfer-funds 
+          description: It enables funds to be transfered from one account to another
+          required: true # can also be true depending on user preference
+          schema: # Schema definition
+            $ref: "#/definitions/transferFunds"
+      responses: # server responses
+        200:
+          description: should return funds transfered successfully         
+
+
 
 definitions: # Schema definition for request body
    
@@ -382,4 +407,13 @@ definitions: # Schema definition for request body
 
 
 
-        
+  transferFunds:
+    type: object
+    properties:
+      amount:
+        type: number
+        default: 4000
+
+      recipientEmail:
+        type: string
+        default: driver1@gmail.com           
