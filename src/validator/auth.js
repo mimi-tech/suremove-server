@@ -29,7 +29,7 @@ module.exports = {
   },
 
   forgotPassword: {
-    email: Joi.string().required(),
+    emailAddress: Joi.string().required(),
   },
 
   validateForgotPasswordCode: {

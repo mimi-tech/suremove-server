@@ -189,6 +189,10 @@ const publicData = {
   walletBalance: user.walletBalance,
   referralCount: user.referralCount,
   whoAreYou: user.whoAreYou,
+  inActive:user.inActive,
+  txnPin:user.txnPin,
+  createdAt: user.createdAt,
+  isOngoingBooking:user.isOngoingBooking
 };
     return {
       status: true,
@@ -413,11 +417,11 @@ const publicData = {
 
  const sendEmailVerificationCode = async (params) => {
   try {
-    const { authId } = params;
+    const { emailAddress } = params;
 
     //check if the user is already existing
     const user = await usersAccount.findOne({
-      _id: authId,
+      email: emailAddress,
     });
 
     if (!user) {

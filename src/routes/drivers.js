@@ -100,5 +100,11 @@ routes.get(
   drivers.getAllDriversRatings
 );
 
+routes.get(
+  "/get-driver-booking-decision",
+  validate(validator.getDriverBookingDecision),
+  drivers.getDriverBookingDecision
+);
+
 
 module.exports = routes;

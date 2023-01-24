@@ -186,7 +186,12 @@ const db = admin.firestore();
  const updateBooking = async (params) => {
   try {
     const { authId, bookingId, ...dataToUpdate} = params;
-    
+    //check if booking have not been updated
+    const isBookingExisting = await bookingCollection.findOne({
+      _id: bookingId,
+       });
+
+       if(isBookingExisting && isBookingExisting.isLegal === false){
       
     const filter = { $or: [{ _id: bookingId }, { customerAuthId:authId }] };
       
@@ -207,7 +212,11 @@ const db = admin.firestore();
       status: false,
       message: "Error occurred updating booking",
     };
-
+  }
+  return {
+    status: false,
+    message: "Booking cannot be updated",
+  };
   }catch(e){
     console.log(e)
     return {
@@ -867,6 +876,50 @@ if(isDailyAnalysis){
 };
 
 
+/**
+ * for connecting driver
+ * @param {Object} params  user id {authId} params needed.
+ * @returns {Promise<Object>} Contains status, and returns data and message
+ */
+
+const connectDriver = async (params) => {
+  const {driverId,customerId } = params;
+  try {
+
+ //check if the driver is already existing
+ const driver = await drivers.findOne({
+  _id: driverId,
+});
+
+if (!driver) {
+  return {
+    status: false,
+    message: "Driver does not exist",
+  };
+}
+
+      //the driver accepted the booking
+      const data = {
+       connect:true,
+        customerId:customerId
+      }
+      
+      
+       await db.collection('drivers').doc(driverId).set(JSON.parse(JSON.stringify(data, { merge: true })));
+    return {
+      status: true,
+      message:"connected successfully"
+    };
+  } catch (e) {
+    
+    return {
+      status: false,
+      message: constants.SERVER_ERROR("CALCULATING BOOKING COST"),
+    };
+  }
+};
+
+
 module.exports = {
     bookingDetails,
     cancelBooking,
@@ -877,6 +930,7 @@ module.exports = {
     getAwaitingBooking,
     deleteAwaitingBooking,
     calculateCost,
-    updateBooking
+    updateBooking,
+    connectDriver
   
 };

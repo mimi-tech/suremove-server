@@ -60,4 +60,8 @@ module.exports = {
 
   },
 
+  sendEmailVerificationCode:{
+    emailAddress : Joi.string().required(),
+  }
+
 };

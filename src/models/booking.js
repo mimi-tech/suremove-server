@@ -153,6 +153,10 @@ const bookingCollection = new mongoose.Schema(
         type: Boolean,
         default:false
       },
+      isLegal: {
+        type: Boolean,
+        default:false
+      },
 
       
 

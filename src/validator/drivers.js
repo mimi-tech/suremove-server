@@ -161,5 +161,9 @@ module.exports = {
     companyId: Joi.string().required(),
   },
 
+  getDriverBookingDecision: {
+    driverId: Joi.string().required(),
+  }
+
 
 };

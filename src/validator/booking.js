@@ -107,5 +107,15 @@ module.exports = {
 
   methodOfPayment: Joi.string()
       .valid("cash", "wallet"),
+
+  isLegal: Joi.boolean().required(),  
+  totalAmount: Joi.number(),
+  amount: Joi.number()
+  },
+
+  connectDriver:{
+    driverId:Joi.string().required(),
+    customerId:Joi.string().required()
+
   }
 };

@@ -208,7 +208,7 @@ const generalLogin = async (params) => {
 
     //extract and store existing encrypted user password
     const existingUserPassword = userExist.password;
-    
+    const hashedPassword = await bcrypt.hash(password, 10);
     //validate incoming user password with existing password
     const isPasswordCorrect = await bcrypt.compare(
       password,
@@ -219,6 +219,7 @@ const generalLogin = async (params) => {
       return {
         status: false,
         message: "incorrect credentials",
+        
       };
     }
 
@@ -349,14 +350,14 @@ const generalLogin = async (params) => {
  */
  const forgotPassword = async (params) => {
   try {
-    const { email } = params;
+    const { emailAddress } = params;
 
     //generate email code
     const emailCode = generalHelperFunctions.generateEmailCode();
     //check if email exist in the database
 
     const isEmailExisting = await usersAccount.findOne({
-      email: email,
+      email: emailAddress,
     });
 
     if (!isEmailExisting) {

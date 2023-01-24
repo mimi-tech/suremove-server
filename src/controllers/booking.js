@@ -46,6 +46,10 @@ const updateBooking = async (req, res) => {
   const data = await booking.updateBooking(req.form);
   return response(res, data);
 }
+const connectDriver = async (req, res) => {
+  const data = await booking.connectDriver(req.form);
+  return response(res, data);
+}
 
 module.exports = {
     bookingDetails,
@@ -57,5 +61,6 @@ module.exports = {
     getAwaitingBooking,
     deleteAwaitingBooking,
     calculateCost,
-    updateBooking
+    updateBooking,
+    connectDriver
 };

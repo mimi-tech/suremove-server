@@ -77,7 +77,9 @@ const restricted = [
   "/update-booking",
   "/get-rating",
   "/transfer-fund",
-  "/update-personnel-account"
+  "/update-personnel-account",
+  "/connect-driver",
+  "/get-driver-booking-decion"
 
 ];
 const inServiceEndPoints = ["/get-church-user-in-app"];

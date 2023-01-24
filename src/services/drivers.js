@@ -542,7 +542,7 @@ await awaitingBooking.create({
 
 return {
   status: false,
-  message: "Driver not found Please wait patiently",
+  message: "Driver not found",
 };
 }
   return {
@@ -687,9 +687,7 @@ return {
       }
       
       
-      const res = await db.collection('drivers').doc(driverId).update(JSON.parse(JSON.stringify(data,
-         
-        )));
+      const res = await db.collection('drivers').doc(driverId).update(JSON.parse(JSON.stringify(data, )));
 
         const filter = {_id: driverId}
         const details =  await drivers.findByIdAndUpdate(filter,
@@ -867,6 +865,51 @@ const createRejectedBooking = async (params) => {
   }
 };
 
+
+/**
+ * for fetching DRIVER  booking decision
+ * @param {Object} params  companyId
+ * @returns {Promise<Object>} Contains status, and returns data and message
+ */
+const getDriverBookingDecision = async (params) => {
+  try {
+    const { driverId } = params;
+
+    const driverRef = db.collection('drivers').doc(driverId);
+    const doc = await driverRef.get();
+     if (!doc.exists) {
+      return {
+        status: false,
+        message: "Driver does not exist",
+      };
+    }
+
+    if(doc.data().accept === true) {
+      return {
+        status: true,
+        data: doc.data(),
+        message: "Accepted connection"
+      };
+    }
+
+    return {
+      status: false,
+      message: "Rejected connection"
+    };
+
+    
+  } catch (e) {
+    console.log(e)
+    return {
+      status: false,
+      message: constants.SERVER_ERROR("GET DRIVER DECISION BOOKING"),
+    };
+  }
+};
+
+
+
+
 module.exports = {
   createDriversAccount,
   getAllDrivers,
@@ -883,6 +926,7 @@ module.exports = {
   getAllRejectedBooking,
   deleteRejectedBooking,
   getAllCompanyRejectedBooking,
-  getAllDriversRatings
+  getAllDriversRatings,
+  getDriverBookingDecision
   
 };

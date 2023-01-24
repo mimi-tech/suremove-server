@@ -63,6 +63,11 @@ routes.put(
   validate(validator.updateBooking),
   booking.updateBooking
 );
+routes.post(
+  "/connect-driver",
+  validate(validator.connectDriver),
+  booking.connectDriver
+);
 
 
 

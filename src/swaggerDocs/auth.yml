@@ -252,7 +252,7 @@ definitions: # Schema definition for request body
   forgotPassword:
     type: object
     properties:
-      email:
+      emailAddress:
         type: string
         default: mimi@gmail.com
 
