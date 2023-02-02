@@ -85,7 +85,7 @@ const db = admin.firestore();
 
      //check if user has a booking collection
      const isUserExisting = await bookingCollection.findOne({
-        authId: authId,
+      customerAuthId: authId,
       });
   
       if (isUserExisting) {
@@ -103,13 +103,14 @@ const db = admin.firestore();
       ongoing:true,
       isPaymentSuccessful:false,
       confirmDelivery:false,
+      isLegal:false,
         ...dataToUpload}, {
         new: true,
       });
 
       //Update the user collection isOngoingBooking to true
-      
-      await usersAccount.findOneAndUpdate(filter, {isOngoingBooking:true}, {
+      const filterUser = { _id: authId };
+      await usersAccount.findOneAndUpdate(filterUser, {isOngoingBooking:true}, {
         new: true,
       });
     //This will let the driver to know that he has gotten a booking
@@ -117,7 +118,9 @@ const db = admin.firestore();
     const data = {
       connect: true,
       customerId:dataToUpload.sender.id,
-      bookingId:addBooking._id
+      bookingId:addBooking._id,
+      reject:false,
+      accept:false
     }
     
     const res = await db.collection('drivers').doc(`${dataToUpload.driverId}`).set(JSON.parse(JSON.stringify(data,
@@ -241,7 +244,7 @@ const db = admin.firestore();
         customerAuthId: authId,
       });
   
-      if (isBookingExisting) {
+      if (isBookingExisting && isBookingExisting.isLegal === false) {
 
         isBookingExisting.ongoing = false;
         isBookingExisting.cancelBooking = true;
@@ -295,7 +298,7 @@ const db = admin.firestore();
     await db.collection('drivers').doc(`${driverInfo.id}`).update(JSON.parse(JSON.stringify(data)));
    
         return {
-          status: false,
+          status: true,
           message: "This booking is now cancelled",
         };
       }
@@ -349,10 +352,10 @@ const db = admin.firestore();
  */
 
 const getABooking = async (params) => {
-  const { bookingId,customerId } = params;
+  const { bookingId,customerAuthId } = params;
   try {
     const booking = await bookingCollection.findOne(
-      { $or: [{ _id: bookingId }, {customerAuthId:customerId }] });
+      { $or: [{ _id: bookingId }, {customerAuthId:customerAuthId }] });
 
     if (!booking) {
       return {
@@ -506,13 +509,15 @@ const getABooking = async (params) => {
     }
 
   }else{
-     //Take the money from customer wallet
+    console.log(`amount: ${booking.totalAmount}`)
+   
+     //Takethe money from customer wallet
   const body = { amount:booking.totalAmount, userAuthId:booking.customerAuthId, type:"withdrawal" };
   const data = await updateWallet(body);
   if (data.status === false) {
     return {
       status: false,
-      message: "Insufficient fund found",
+      message: data.message,
     };
   }
 
@@ -652,7 +657,7 @@ await db.collection('drivers').doc(`${booking.driverId}`).update(JSON.parse(JSON
     const monthName = generalHelperFunctions.generateMonthName();
 
 
- //Update the user collection isOngoingBooking to true
+ //Update the user collection isOngoingBooking to false
  const filter = { _id: driverId };
  const userFilter = { _id: authId };
  await usersAccount.findOneAndUpdate(userFilter, {isOngoingBooking:false}, {

@@ -101,9 +101,9 @@ routes.get(
 );
 
 routes.get(
-  "/get-driver-booking-decision",
-  validate(validator.getDriverBookingDecision),
-  drivers.getDriverBookingDecision
+  "/get-driver-booking-connection",
+  validate(validator.getDriverBookingConnection),
+  drivers.getDriverBookingConnection
 );
 
 

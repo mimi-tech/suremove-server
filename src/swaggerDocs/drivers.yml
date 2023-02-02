@@ -401,11 +401,11 @@ paths:
           description: should return all drivers rating    
 
 
-  /drivers/get-driver-booking-decision:
+  /drivers/get-driver-booking-connection:
     get:
       tags:
         - DRIVERS # Value of the tag
-      summary: GET DRIVERS BOOKING DECISION.
+      summary: GET DRIVERS BOOKING CONNECTION.
       produces:
         - application/json
       parameters:
@@ -421,9 +421,15 @@ paths:
           default: 1
           required: true
 
+        - in: query
+          name: type
+          type: string
+          default: connection
+          required: true  
+
       responses:
         200:
-          description: should return booking decision status              
+          description: should return booking connection status              
 
 
 

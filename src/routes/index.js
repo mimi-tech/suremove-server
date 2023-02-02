@@ -6,6 +6,8 @@ const companyRoutes = require("./company");
 const driversRoutes = require("./drivers");
 const personnelRoutes = require("./personnel");
 const analysisRoutes = require("./analysis");
+const commonsRoutes = require("./commons");
+
 const { response } = require("../helpers");
 
 const routes = Router();
@@ -17,6 +19,7 @@ routes.use('/company', companyRoutes);
 routes.use('/drivers', driversRoutes);
 routes.use('/personnel', personnelRoutes);
 routes.use('/analysis', analysisRoutes);
+routes.use('/commons', commonsRoutes);
 
 routes.use((_, res) => {
   response(res, { status: false, message: "Route not found" }, 404);

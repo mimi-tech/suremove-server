@@ -17,6 +17,7 @@
     awaitingBooking: require("./awaitingBooking"),
     history:require("./history"),
     refeeral:require("./refeeral"),
+    commons:require("./commons"),
   };
 
  

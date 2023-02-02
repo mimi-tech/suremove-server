@@ -7,5 +7,7 @@ module.exports = {
     drivers: require("./drivers"),
     personnel: require("./personnel"),
     analysis: require("./analysis"),
-    booking: require("./booking")
+    booking: require("./booking"),
+    commons: require("./commons")
+
   };

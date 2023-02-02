@@ -79,8 +79,8 @@ const getAllDriversRatings = async (req, res) => {
   return response(res, data);
 };
 
-const getDriverBookingDecision = async (req, res) => {
-  const data = await drivers.getDriverBookingDecision(req.form);
+const getDriverBookingConnection = async (req, res) => {
+  const data = await drivers.getDriverBookingConnection(req.form);
   return response(res, data);
 };
 
@@ -101,5 +101,5 @@ module.exports = {
   deleteRejectedBooking,
   getAllCompanyRejectedBooking,
   getAllDriversRatings,
-  getDriverBookingDecision
+  getDriverBookingConnection
 };

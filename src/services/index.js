@@ -6,6 +6,8 @@ module.exports = {
     company: require("./company"),
     personnel: require("./personnel"),
     analysis: require("./analysis"),
-    drivers: require("./drivers")
+    drivers: require("./drivers"),
+    commons: require("./commons")
+
   };
   

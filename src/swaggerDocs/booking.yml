@@ -87,12 +87,6 @@ paths:
           default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-0
 
         - in: query
-          name: bookingId
-          type: string
-          default: 05533fe8-3c2d-4b13-8c20-3425754fc050
-          required: false
-
-        - in: query
           name: customerAuthId
           type: string
           default: 05533fe8-3c2d-4b13-8c20-3425754fc050

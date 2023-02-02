@@ -104,11 +104,12 @@ module.exports = {
     item: Joi.object({
       size: Joi.string().required(),
       number: Joi.number().required(),
-      name: Joi.string().required()
+      name: Joi.string().required(),
+      weight: Joi.number().required(),
   }).required(),
   paymentMethod: Joi.string()
       .required()
-      .valid("cash", "wallet"),
+      .valid("cash", "wallet","card"),
   },
 
   updateDriversCurrentLocation:{
@@ -161,9 +162,13 @@ module.exports = {
     companyId: Joi.string().required(),
   },
 
-  getDriverBookingDecision: {
+  getDriverBookingConnection: {
     driverId: Joi.string().required(),
+    type: Joi.string()
+    .required()
+    .valid("connection", "accept"),
+},
   }
 
 
-};
+

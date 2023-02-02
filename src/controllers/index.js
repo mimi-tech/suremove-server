@@ -1,3 +1,5 @@
+const { commons } = require("../models");
+
 /* eslint-disable global-require */
 module.exports = {
     auth: require("./auth"),
@@ -6,6 +8,7 @@ module.exports = {
     company: require("./company"),
     drivers: require("./drivers"),
     personnel: require("./personnel"),
-    analysis:require("./analysis")
+    analysis:require("./analysis"),
+    commons:require("./commons")
   };
   

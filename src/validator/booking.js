@@ -10,12 +10,13 @@ module.exports = {
         item: Joi.object({
             size: Joi.string().required(),
             number: Joi.number().required(),
-            name: Joi.string().required()
+            name: Joi.string().required(),
+            weight: Joi.number().required(),
         }).required(),
 
         receiver: Joi.object({
             name: Joi.string().required(),
-            profilePicture: Joi.string().required(),
+            profilePicture: Joi.string(),
             phoneNumber: Joi.string().required(),
             address: Joi.string().required(),
             gender:Joi.string().required(),
@@ -24,7 +25,7 @@ module.exports = {
         sender: Joi.object({
             id: Joi.string().required(),
             name: Joi.string().required(),
-            profilePicture: Joi.string().required(),
+            profilePicture: Joi.string(),
             phoneNumber: Joi.string().required(),
             address: Joi.string().required(),
             gender:Joi.string().required(),
@@ -36,6 +37,8 @@ module.exports = {
             profilePicture: Joi.string().required(),
             phoneNumber: Joi.string().required(),
             gender:Joi.string().required(),
+            rating:Joi.number().required(),
+
         }).required(),
         amount: Joi.number().required(),
         sourceAddress:Joi.string().required(),
@@ -53,7 +56,7 @@ module.exports = {
        
         methodOfPayment: Joi.string()
       .required()
-      .valid("cash", "wallet","promo"),
+      .valid("cash", "wallet","promo","card"),
         driverId: Joi.string().required(),
         driverAuthId: Joi.string().required()
 
@@ -69,7 +72,7 @@ module.exports = {
 
   getABooking: {
     bookingId: Joi.string(),
-    customerId: Joi.string(),
+    customerAuthId: Joi.string(),
   },
 
   customerConfirmBooking:{
@@ -102,7 +105,8 @@ module.exports = {
     item: Joi.object({
       size: Joi.string().required(),
       number: Joi.number().required(),
-      name: Joi.string().required()
+      name: Joi.string().required(),
+      weight: Joi.number().required(),
   }).required(),
 
   methodOfPayment: Joi.string()

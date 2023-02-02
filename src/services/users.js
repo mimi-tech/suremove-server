@@ -271,6 +271,7 @@ const publicData = {
         message: "Account is not existing.",
       };
     }
+    console.log(`wallet: ${isUserExisting.walletBalance }`)
    if(type === "fund"){
     
     isUserExisting.walletBalance = amount + isUserExisting.walletBalance;
@@ -314,6 +315,7 @@ const publicData = {
    }
 
    if(isUserExisting.walletBalance < amount){
+    
     return {
       status: false,
       message: "Insufficient fund",
@@ -360,7 +362,7 @@ const publicData = {
 
     
   } catch (error) {
-    
+    console.error(error);
     return {
       status: false,
       message: constants.SERVER_ERROR("UPDATE WALLET"),

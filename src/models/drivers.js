@@ -76,6 +76,7 @@ const drivers = new mongoose.Schema(
       loc: {
         type: { type: String },
         coordinates: [Number],
+        
       },
 
       lincense: {
