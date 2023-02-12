@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const admin = require("firebase-admin");
 const { constants } = require("../configs");
-const { usersAccount,drivers,personnel,history,refeeral } = require("../models");
+const { usersAccount,drivers,personnel,history,refeeral,companies } = require("../models");
 const { generalHelperFunctions } = require("../helpers");
 const { EmailService } = require("../helpers/emailService");
 /**
@@ -520,7 +520,7 @@ const updatePassword = async (params) => {
     }
 
 
-    if(dataParams.updateEmail != undefined){
+    if(dataParams.updateEmail !== undefined){
       //check if email is already existing",
 
       const isEmailExisting = await usersAccount.findOne(
@@ -552,7 +552,7 @@ const updatePassword = async (params) => {
     //check if the user is a driver account
 
     if(accountToUpdate.whoAreYou === "driver"){
-      const driver = await drivers.findOne({authId:accountToUpdate._id})
+      const driver = await drivers.findOne({driverAuthId:accountToUpdate._id})
        driver.email = accountToUpdate.email,
        driver.firstName = accountToUpdate.firstName,
        driver.lastName = accountToUpdate.lastName,
@@ -573,8 +573,16 @@ const updatePassword = async (params) => {
        await personnels.save();
     }
 
+    if(accountToUpdate.whoAreYou === "company"){
+      const company = await companies.findOne({email:dataParams.email})
+      company.email = accountToUpdate.email,
+      
+       await company.save();
+    }
+
 
     return {
+      data:accountToUpdate,
       status: true,
       message: "Account updated successfully"
     }

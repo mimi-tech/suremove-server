@@ -175,6 +175,12 @@ const drivers = new mongoose.Schema(
         default: 0
       },
 
+      isActive: {
+        type: Boolean,
+        default: true,
+      },
+  
+
       dateAdded: {
         type: String,
         default: new Date().toLocaleString()

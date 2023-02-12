@@ -9,9 +9,9 @@ module.exports = {
         destinationLogitude: Joi.number().required(),
         item: Joi.object({
             size: Joi.string().required(),
-            number: Joi.number().required(),
+            number: Joi.string().required(),
             name: Joi.string().required(),
-            weight: Joi.number().required(),
+            weight: Joi.string().required(),
         }).required(),
 
         receiver: Joi.object({
@@ -104,9 +104,9 @@ module.exports = {
     bookingId: Joi.string().required(),
     item: Joi.object({
       size: Joi.string().required(),
-      number: Joi.number().required(),
+      number: Joi.string().required(),
       name: Joi.string().required(),
-      weight: Joi.number().required(),
+      weight: Joi.string().required(),
   }).required(),
 
   methodOfPayment: Joi.string()

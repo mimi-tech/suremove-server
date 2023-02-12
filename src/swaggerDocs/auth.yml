@@ -235,7 +235,7 @@ definitions: # Schema definition for request body
 
       password:
         type: string
-        default: password  
+        default: abc123  
 
       phoneNumber:
         type: string

@@ -82,6 +82,11 @@ const restricted = [
   "/get-driver-booking-connection",
   "/get-commons",
   "/add-commons",
+  "/create-notification",
+  "/get-notification",
+  "/delete-notification",
+  "/support"
+
 
 ];
 const inServiceEndPoints = ["/get-church-user-in-app"];

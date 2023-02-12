@@ -18,6 +18,9 @@
     history:require("./history"),
     refeeral:require("./refeeral"),
     commons:require("./commons"),
+    bookingConnection:require("./bookingConnection"),
+    notification:require("./notification"),
+
   };
 
  

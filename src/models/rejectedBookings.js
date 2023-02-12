@@ -4,7 +4,6 @@ const rejectedBooking = new mongoose.Schema(
   {
     driverId: {
         type: String,
-        unique: true,
         required: [true, "Id must be provided"],
       },
 
@@ -20,11 +19,10 @@ const rejectedBooking = new mongoose.Schema(
 
       email: {
         type: String,
-        unique:true,
         required: [true, "Email must be provided"],
       },
 
-      profilePicure: {
+      profilePicture: {
         type: String,
         required: [true, "Picture must be provided"],
       
@@ -38,12 +36,17 @@ const rejectedBooking = new mongoose.Schema(
 
         phoneNumber: {
         type: String,
-        unique:true,
         required: [true, "Phone number must be provided"],
       },
 
       companyInfo: {
         type: Object,
+        required: [true, "Company must be provided"],
+      },
+
+      bookingDetails: {
+        type: Object,
+        required: [true, "Booking details must be provided"],
       },
 
       customerInfo: {

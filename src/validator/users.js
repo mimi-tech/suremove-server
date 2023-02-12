@@ -8,6 +8,10 @@ module.exports = {
 
   blockAndUnblockUser: {
     authId: Joi.string().required(),
+    accountId: Joi.string(),
+    type: Joi.string()
+    .required()
+    .valid("deactivate", "blocked"),
   },
 
   getAllUsers: {
@@ -62,6 +66,7 @@ module.exports = {
 
   sendEmailVerificationCode:{
     emailAddress : Joi.string().required(),
+    newEmailAddress:Joi.string()
   }
 
 };

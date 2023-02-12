@@ -2,7 +2,7 @@
 //const { v4: uuid } = require("uuid");
 const admin = require("firebase-admin");
 const { constants } = require("../configs");
-const { drivers,companies ,ratings,usersAccount,rejectedBooking, awaitingBooking} = require("../models");
+const { drivers,companies ,ratings,usersAccount,rejectedBooking, awaitingBooking,bookingCollection, bookingConnection} = require("../models");
 const serviceAccount = require("../../serviceAccountKey.json");
 const { generalHelperFunctions } = require("../helpers");
 
@@ -95,18 +95,20 @@ const db = admin.firestore();
     
  //create driver mini account in firebase
 //check if driver has an account
-
- const data = {
-  uid: isDriverAccountExisting._id,
-  online: false,
+const res = await bookingConnection.create({
+  driverId:createDrivers._id,
+  bookingId:"",
+  reject:false,
+  accept:false,
   connect: false,
   customerId:"",
   cancel:false,
   transit: false
-};
+});
 
-await db.collection('drivers').doc(`${createDrivers._id}`).set(JSON.parse(JSON.stringify(data)));
-  isDriverAccountExisting.whoAreYou = "driver";
+
+  if(res){
+    isDriverAccountExisting.whoAreYou = "driver";
   isDriverAccountExisting.save();
   
   return {
@@ -114,7 +116,11 @@ await db.collection('drivers').doc(`${createDrivers._id}`).set(JSON.parse(JSON.s
     data:createDrivers,
     message: "Driver's account created successfully",
   };
-  
+  }
+  return {
+    status: false,
+    message: "Error occurred creating drivers account",
+  };
     }
     return {
       status: false,
@@ -249,7 +255,7 @@ const getADriver = async (params) => {
     );
 
     //delete the driver from firestore
-     await db.collection('drivers').doc(driverId).delete();
+     await bookingConnection.deleteOne({driverId: driverId});
 
     return {
       status: true,
@@ -498,13 +504,14 @@ const getAllDriversRatings = async (params) => {
   try {
     
     if(dataToUpload.paymentMethod === "cash"){
+      console.log("Cash");
     const booking = await drivers.aggregate([
       {
          $geoNear: {
             near: { type: "Point", coordinates: [ latitude , longitude  ] },
             distanceField: "dist.calculated",
             maxDistance: 100000,
-            query: { walletBalance: {$gte:amount}, onTransit:false,onlineStatus:true, suspended:false, approved:true},
+            query: { walletBalance: {$gte:amount}, onTransit:false,onlineStatus:true, suspended:false, approved:true, isActive:true},
             includeLocs: "dist.location",
             spherical: true,
             key:"loc"
@@ -557,14 +564,14 @@ return {
   
   }
 
-  console.log("here");
+  
     const walletBooking = await drivers.aggregate([
       {
          $geoNear: {
             near: { type: "Point", coordinates: [ latitude , longitude  ] },
             distanceField: "dist.calculated",
             maxDistance: 1000000,
-            query: { onTransit:false,onlineStatus:true,suspended:false,approved:true},
+            query: { onTransit:false,onlineStatus:true,suspended:false,approved:true,isActive:true},
             includeLocs: "dist.location",
             spherical: true,
             key:"loc"
@@ -592,20 +599,20 @@ return {
 //console.log(walletBooking)
  //create the booking details in app
    
-// if(walletBooking.length === 0){
-//   await awaitingBooking.create({
-//     customerAuthId:authId,
-//     customerName:dataToUpload.customerName,
-//     sourceAddress:dataToUpload.sourceAddress,
-//     destinationAddress:dataToUpload.destinationAddress,
-//     phoneNumber:dataToUpload.phoneNumber,
-//     item:dataToUpload.item,
-//   })
-// return {
-//   status: false,
-//   message: "Driver not found",
-// };
-// }
+if(walletBooking.length === 0){
+  await awaitingBooking.create({
+    customerAuthId:authId,
+    customerName:dataToUpload.customerName,
+    sourceAddress:dataToUpload.sourceAddress,
+    destinationAddress:dataToUpload.destinationAddress,
+    phoneNumber:dataToUpload.phoneNumber,
+    item:dataToUpload.item,
+  })
+return {
+  status: false,
+  message: "Driver not found",
+};
+}
 
   return {
     
@@ -696,16 +703,22 @@ return {
 
     if(type === "accept"){
       //the driver accepted the booking
-      const data = {
-        accept: true,
-        reject:false,
-        connect:false,
-        transit:true,
-        customerId:customerId
+      const res = await bookingConnection.findOne({driverId:driverId});
+   
+      if(!res){
+      
+         return {
+          status: false,
+          message: "Error occurred while fetching driver connection",
+        };
+       
       }
-      
-      
-      const res = await db.collection('drivers').doc(driverId).update(JSON.parse(JSON.stringify(data, )));
+        res.connect = false;
+        res.customerId = customerId;
+        res.reject = false;
+        res.accept = true;
+        res.transit = true;
+         res.save();
 
         const filter = {_id: driverId}
         const details =  await drivers.findByIdAndUpdate(filter,
@@ -743,28 +756,32 @@ return {
     }
     
 
-    const data = {
-      accept: false,
-      reject:true,
-      connect:false,
-      transit: false,
-      customerId:customerId
-    }
     
-    const res = await db.collection('drivers').doc(driverId).update(JSON.parse(JSON.stringify(data,
+    const res = await bookingConnection.findOne({driverId:driverId});
+   
+      if(!res){
+      
+         return {
+          status: false,
+          message: "Error occurred while fetching driver connection",
+        };
        
-      )));
+      }
+        res.connect = false;
+        res.customerId = customerId;
+        res.reject = true;
+        res.accept = true;
+        res.transit = false;
+         res.save();
 
-      if(res){
-        return {
+         return {
           status: true,
           message: `Driver ${type} the booking `,
         };
-      }
 
    
   } catch (e) {
-    console.log(e);
+   
     return {
       status: false,
       message: constants.SERVER_ERROR("GETTING UPDATING DRIVER DECISION"),
@@ -801,9 +818,10 @@ const createRejectedBooking = async (params) => {
       message: "Data not created successfully",
     };
   } catch (e) {
+    console.log(e);
     return {
       status: false,
-      message: constants.SERVER_ERROR("RATING DRIVER"),
+      message: constants.SERVER_ERROR("BOOKING REJECTION UPDATE"),
     };
   }
 };
@@ -893,17 +911,18 @@ const createRejectedBooking = async (params) => {
 const getDriverBookingConnection = async (params) => {
   try {
     const { driverId, type } = params;
-
-    const driverRef = db.collection('drivers').doc(driverId);
-    const doc = await driverRef.get();
-     if (!doc.exists) {
+    const res = await bookingConnection.findOne({driverId:driverId});
+    if(!res){
+     
       return {
-        status: false,
-        message: "Driver does not exist",
-      };
-    }
+       status: false,
+       message: "Driver does not exist",
+     };
+    
+   }
+    
      if(type === "connection"){
-    if(doc.data().connect === true) {
+    if(res.connect === true) {
     
       return {
         status: true,
@@ -915,7 +934,7 @@ const getDriverBookingConnection = async (params) => {
 
 
   if(type === "accept"){
-    if(doc.data().accept === true) {
+    if(res.accept === true) {
     
       return {
         status: true,

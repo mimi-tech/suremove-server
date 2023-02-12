@@ -15,7 +15,10 @@ const {bookingCollection,
    monthly,
    weekly,
    daily,
-   awaitingBooking,companies
+   awaitingBooking,
+   companies,
+   bookingConnection,
+   commons
   
   } = require("../models");
 const { updateWallet} = require("./users");
@@ -28,7 +31,7 @@ if (!admin.apps.length) {
   });
 }
 
-const db = admin.firestore();
+//const db = admin.firestore();
 
 /**
  * for customers booking details
@@ -114,26 +117,22 @@ const db = admin.firestore();
         new: true,
       });
     //This will let the driver to know that he has gotten a booking
-
-    const data = {
-      connect: true,
-      customerId:dataToUpload.sender.id,
-      bookingId:addBooking._id,
-      reject:false,
-      accept:false
-    }
-    
-    const res = await db.collection('drivers').doc(`${dataToUpload.driverId}`).set(JSON.parse(JSON.stringify(data,
-       { merge: true })
-      ));
-  
-      if(res){
-        return {
-          status: true,
-          data:addBooking,
-          message: "Booking details saved successfully",
+    const res = await bookingConnection.findOne({driverId:dataToUpload.driverId});
+   
+      if(!res){
+      
+         return {
+          status: false,
+          message: "Error occurred while fetching driver connection",
         };
+       
       }
+      res.connect = true;
+        res.customerId = dataToUpload.sender.id;
+        res.bookingId = addBooking._id;
+        res.reject = false;
+        res.accept = false;
+         res.save();
        
       }
       
@@ -150,28 +149,32 @@ const db = admin.firestore();
 
      //This will let the driver to know that he has gotten a booking
 
-     const data = {
-      connect: true,
-      customerId:dataToUpload.sender.id,
-      reject:false,
-      accept:false
-    }
-    
-    const res = await db.collection('drivers').doc(`${dataToUpload.driverId}`).set(JSON.parse(JSON.stringify(data,
-       { merge: true }
-      )));
+     //This will let the driver to know that he has gotten a booking
+     const res = await bookingConnection.findOne({driverId:dataToUpload.driverId});
+   
+     if(!res){
+     
+        return {
+         status: false,
+         message: "Error occurred while fetching driver connection",
+       };
+      
+     }
+       res.connect = true;
+       res.customerId = dataToUpload.sender.id;
+       res.bookingId = addBooking._id;
+       res.reject = false;
+       res.accept = false;
+        res.save();
   
-      if(res){
         return {
           status: true,
           data:details,
           message: "Booking details saved successfully",
         };
-      }
        
       
   } catch (e) {
-    console.log(e);
     return {
       status: false,
       message: constants.SERVER_ERROR("CREATING BOOKING APP ACCOUNT"),
@@ -285,29 +288,31 @@ const db = admin.firestore();
         new: true,
         });
 
-       
-
-     const data = {
-      connect: false,
-      cancel:true,
-      accept: false,
-      transit:false,
-      customerId:""
-    }
-    
-    await db.collection('drivers').doc(`${driverInfo.id}`).update(JSON.parse(JSON.stringify(data)));
+        const res = await bookingConnection.findOne({driverId:driverInfo.id});
    
-        return {
-          status: true,
-          message: "This booking is now cancelled",
-        };
-      }
+        if(!res){
+        
+           return {
+            status: false,
+            message: "Error occurred while fcancelling your booking",
+          };
+         
+        }
+          res.connect = false;
+          res.customerId = "";
+          res.cancel = true;
+          res.accept = false;
+          res.transit = false;
+           res.save();
+    
+           return {
+            status: true,
+            message: "This booking is now cancelled",
+          };
+        }
      
   
-      return {
-        status: false,
-        message: "Sorry there is an error cancelling your booking",
-      };
+     
     } catch (e) {
       return {
         status: false,
@@ -439,9 +444,11 @@ const getABooking = async (params) => {
      }
 
     //get owner and contributor id
-    const secretRef = db.collection('secret').doc("Pnf7UykV4bWxDWLCaBwK");
-    const doc = await secretRef.get();
-    if (!doc.exists) {
+    const doc = await commons.find();
+
+    //const secretRef = db.collection('secret').doc("Pnf7UykV4bWxDWLCaBwK");
+   // const doc = await secretRef.get();
+    if (!doc) {
       return {
         status: false,
         message: "An error occurred getting owner and contributor",
@@ -463,13 +470,11 @@ const getABooking = async (params) => {
 
     //check the method of payment
     if(booking.methodOfPayment === "cash"){
-       
-
-      //Take the amount from driver account
+       //Take the amount from driver account
       const body = { amount:booking.totalAmount, userAuthId:booking.driverAuthId, type:"withdrawal" };
       const data = await updateWallet(body);
       if (data.status === false) {
-        console.log("sjbdjwhdbwjhbd");
+       
         return {
           status: false,
           message: data.message,
@@ -477,11 +482,9 @@ const getABooking = async (params) => {
       }
 
     //Fund the owner account
-    const ownerBody = { amount:ownerAmount, userAuthId:doc.data().ownerId, type:"fund" };
+    const ownerBody = { amount:ownerAmount, userAuthId:doc.ownerId, type:"fund" };
     const ownerData = await updateWallet(ownerBody);
     if (ownerData.status === false) {
-      console.log("ppppppp")
-      console.log(ownerData.message)
       return {
         status: false,
         message: ownerData.message,
@@ -499,7 +502,7 @@ const getABooking = async (params) => {
     }
 
     //Fund the contributor account
-    const contributorsBody = { amount:contributorAmount, userAuthId:doc.data().contributorId, type:"fund" };
+    const contributorsBody = { amount:contributorAmount, userAuthId:doc.contributorId, type:"fund" };
     const contributorsData = await updateWallet(contributorsBody);
     if (contributorsData.status === false) {
       return {
@@ -522,7 +525,7 @@ const getABooking = async (params) => {
   }
 
   //Fund the owner account
-  const ownerBody = { amount:ownerAmount, userAuthId:doc.data().ownerId, type:"fund" };
+  const ownerBody = { amount:ownerAmount, userAuthId:doc.ownerId, type:"fund" };
   const ownerData = await updateWallet(ownerBody);
   if (ownerData.status === false) {
     return {
@@ -542,7 +545,7 @@ const getABooking = async (params) => {
   }
 
   //Fund the contributor account
-  const contributorsBody = { amount:contributorAmount, userAuthId:doc.data().contributorId, type:"fund" };
+  const contributorsBody = { amount:contributorAmount, userAuthId:doc.contributorId, type:"fund" };
   const contributorsData = await updateWallet(contributorsBody);
   if (contributorsData.status === false) {
     return {
@@ -595,8 +598,8 @@ const getABooking = async (params) => {
     monthName:monthName,
     companyId:booking.companyDetails.id,
     distance: booking.distance,
-    ownerId:doc.data().ownerId,
-    contributorId:doc.data().contributorId,
+    ownerId:doc.ownerId,
+    contributorId:doc.contributorId,
     ownerAmount:ownerAmount,
     driversAmount:driversAmount,
     partnersAmount: partnersAmount,
@@ -610,11 +613,20 @@ const getABooking = async (params) => {
       new: true,
     });
 //update the driver collection in firebase that customer have confirm delivery
-const data = { 
-  confirm:true
-}
-await db.collection('drivers').doc(`${booking.driverId}`).update(JSON.parse(JSON.stringify(data)));
 
+const res = await bookingConnection.findOne({driverId:booking.driverId});
+   
+     if(!res){
+     
+        return {
+         status: false,
+         message: "Error occurred while fetching driver connection",
+       };
+      
+     }
+       res.confirm = true;
+      
+        res.save();
     
  
     if(saveAnalysis){
@@ -664,17 +676,26 @@ await db.collection('drivers').doc(`${booking.driverId}`).update(JSON.parse(JSON
   new: true,
 });
 
-const data = {
-  accept: false,
-  reject:false,
-  connect:false,
-  transit:false,
-  confirm:false
-}
 
 
-await db.collection('drivers').doc(driverId).update(JSON.parse(JSON.stringify(data)));
+const res = await bookingConnection.findOne({driverId:driverId});
+   
+     if(!res){
+     
+        return {
+         status: false,
+         message: "Error occurred while fetching driver connection",
+       };
+      
+     }
+       res.connect = false;
+       res.reject = false;
+       res.accept = false;
+       res.transit = false;
+       res.confirm = false;
 
+
+        res.save();
 
   const isDriver = await drivers.findOne({ _id: driverId});
 
@@ -903,15 +924,22 @@ if (!driver) {
   };
 }
 
-      //the driver accepted the booking
-      const data = {
-       connect:true,
-        customerId:customerId
-      }
-      
-      
-       await db.collection('drivers').doc(driverId).set(JSON.parse(JSON.stringify(data, { merge: true })));
-    return {
+     
+       const res = await bookingConnection.findOne({driverId});
+   
+       if(!res){
+       
+          return {
+           status: false,
+           message: "Error occurred while fetching driver connection",
+         };
+        
+       }
+         res.connect = true;
+         res.customerId = customerId;
+          res.save();
+   
+       return {
       status: true,
       message:"connected successfully"
     };

@@ -81,8 +81,9 @@ const { EmailService } = require("../helpers/emailService");
 
  const blockAndUnblockUser = async (params) => {
   try {
-    const { authId } = params;
-
+    const { authId, type, accountId } = params;
+ 
+    if(type === "deactivate"){
     //check if the user is already existing
     const user = await usersAccount.findOne({
       _id: authId,
@@ -95,22 +96,83 @@ const { EmailService } = require("../helpers/emailService");
       };
     }
 
-    //go ahead and block or unblock the account
+    //go ahead and activate or deactivate the account
     if(user.inActive === true){
       user.inActive = false
       user.save();
+      //check if the user is already a driver
+      if(user.whoAreYou === "driver"){
+        await drivers.findOneAndUpdate(
+          { driverAuthId: authId},
+          {isActive: false}
+        );
+    
+      }
       return {
         status: true,
-        message: "account blocked successfully",
+        data:user,
+        message: "account de-activated successfully",
       };
     }
     user.inActive = true
     user.save();
+     //check if the user is already a driver
+     if(user.whoAreYou === "driver"){
+      await drivers.findOneAndUpdate(
+        { driverAuthId: authId},
+        {isActive: true}
+      );
+  
+    }
+    return {
+      status: true,
+      data:user,
+      message: "account activated successfully",
+    };
+  }
+
+   //go ahead and block or unblock the account
+    //check if the user is already existing
+    const user = await usersAccount.findOne({
+      _id: accountId,
+    });
+
+    if (!user) {
+      return {
+        status: false,
+        message: "User does not exist",
+      };
+    }
+   if(user.blocked === true){
+    user.blocked = false
+    user.save();
+     //check if the user is already a driver
+     if(user.whoAreYou === "driver"){
+      await drivers.findOneAndUpdate(
+        { driverAuthId: accountId},
+        {isActive: true}
+      );
+  
+    }
     return {
       status: true,
       message: "account unblocked successfully",
     };
+  }
+  user.blocked = true
+  user.save();
+  //check if the user is already a driver
+  if(user.whoAreYou === "driver"){
+    await drivers.findOneAndUpdate(
+      { driverAuthId: accountId},
+      {isActive: false}
+    );
 
+  }
+  return {
+    status: true,
+    message: "account blocked successfully",
+  };
    
   } catch (e) {
     return {
@@ -362,7 +424,6 @@ const publicData = {
 
     
   } catch (error) {
-    console.error(error);
     return {
       status: false,
       message: constants.SERVER_ERROR("UPDATE WALLET"),
@@ -419,7 +480,7 @@ const publicData = {
 
  const sendEmailVerificationCode = async (params) => {
   try {
-    const { emailAddress } = params;
+    const { emailAddress, newEmailAddress } = params;
 
     //check if the user is already existing
     const user = await usersAccount.findOne({
@@ -431,6 +492,20 @@ const publicData = {
         status: false,
         message: "User does not exist",
       };
+    }
+
+    if(newEmailAddress !== null){
+      //check if the user is already existing
+    const user = await usersAccount.findOne({
+      email: newEmailAddress,
+    });
+
+    if (user) {
+      return {
+        status: false,
+        message: "This email already exists",
+      };
+    }
     }
 
     //generate email code
@@ -451,9 +526,12 @@ const publicData = {
         message: "A code has been sent your email successfully",
       };
     }
-   
+    return {
+      status: false,
+      message: "There was an error sending your email code",
+    };
   } catch (e) {
-    console.log(e)
+    
     return {
       status: false,
       message: constants.SERVER_ERROR("SENDING EMAIL CODE"),
@@ -485,6 +563,7 @@ const publicData = {
     user.isEmailVerified = true;
     user.save();
     return {
+      data: user,
       status: true,
       message: "Email verified successfully",
     };
@@ -666,7 +745,7 @@ const publicData = {
 
 //check if a recipient is also a driver
 if(recipient.whoAreYou === "driver"){
-  const filter = { authId: recipient._id };
+  const filter = { driverAuthId: recipient._id };
   const newAmount = recipient.walletBalance + amount
   await drivers.findOneAndUpdate(
     filter,

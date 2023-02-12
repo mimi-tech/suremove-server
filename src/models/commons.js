@@ -12,6 +12,14 @@ const commons = new mongoose.Schema(
         required: [true, "weight range must be provided"],
       },
 
+      contributorId: {
+        type: String
+      },
+
+      ownerId: {
+        type: String
+      }
+
   },
   {
     toJSON: { virtuals: true },

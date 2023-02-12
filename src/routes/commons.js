@@ -17,5 +17,23 @@ routes.get(
   commons.getCommons
 );
 
+routes.post(
+  "/create-notification",
+  validate(validator.createNotification),
+  commons.createNotification
+);
+
+routes.get(
+  "/get-notification",
+  validate(validator.getNotification),
+  commons.getNotification
+);
+
+routes.delete(
+  "/delete-notification",
+  validate(validator.deleteNotification),
+  commons.deleteNotification
+);
+
 
 module.exports = routes;

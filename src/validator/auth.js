@@ -43,12 +43,12 @@ module.exports = {
   },
 
   updateAccountData: {
-    updateEmail: Joi.string().email(),
+    updateEmail: Joi.string(),
     updateUsername: Joi.string().lowercase({ force: true }),
     profileImageUrl: Joi.string(),
     firstName: Joi.string(),
     lastName: Joi.string(),
-    gender: Joi.string().valid("Male", "Female"),
+    gender: Joi.string().valid("male", "female"),
     accountType: Joi.string()
       .valid("customer", "driver","company","admin","contributor","owner"),
   },

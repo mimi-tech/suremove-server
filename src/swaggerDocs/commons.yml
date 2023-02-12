@@ -48,6 +48,81 @@ paths:
           description: should return all commons
 
 
+/commons/create-notification:
+    post:
+      tags: # Tag property
+        - COMMONS # Value of the tag
+      summary:  SUREMOVE NOTIFICATIONS.
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-
+        - in: body # request body
+          name: create-notification # name of request, can be any name
+          description: It enables all users to create account
+          required: true # can also be true depending on user preference
+          schema: # Schema definition
+            $ref: "#/definitions/notification"
+      responses: # server responses
+        201:
+          description: should return a notification created successful       
+
+
+/commons/get-notification:
+    get:
+      tags:
+        - NOTIFICATIONS # Value of the tag
+      summary: GET ALL NOTIFICATIONS.
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-0
+
+        - in: query
+          name: page
+          type: number
+          default: 1
+          required: true
+
+      responses:
+        200:
+          description: should return all commons
+
+
+/commons/delete-notification:
+    delete:
+      tags: # Tag property
+        - COMMONS # Value of the tag
+      summary:  SUREMOVE DELETE NOTIFICATIONS.
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: authorization
+          description: access token
+          required: true
+          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-
+        - in: body # request body
+          name: delete-notification # name of request, can be any name
+          description: It enables all notifications to be deleted
+          required: true # can also be true depending on user preference
+          schema: # Schema definition
+            $ref: "#/definitions/deleteNotification"
+      responses: # server responses
+        201:
+          description: should return a notification deleted successful  
+
+
+
+
 definitions: # Schema definition for request body
    
   addCommons:
@@ -55,8 +130,41 @@ definitions: # Schema definition for request body
     properties:
       sizeRange:
         type: array
-        default: [1,5,10,15,20,25,30,35,40,50] 
+        default: ["1","5","10","20","25","30","35","40","50"] 
 
       weightRange:
         type: array
-        default: [1,5,10,15,20,25,30,35,40,50]    
+        default: ["1","5","10","20","25","30","35","40","50"]
+
+      contributorId:
+        type: string
+        default:  62fb5d63cd470527f65f7d05 
+
+      ownerId:
+        type: string
+        default:  62feb4c3e0ebd55aa73889f9     
+
+
+  notification:
+    type: object
+    properties:
+      message:
+        type: string
+        default: "Notification Testing Success" 
+
+      accountType:
+        type: array
+        default: ["customer"]
+
+  deleteNotification:
+    type: object
+    properties:
+      notificationId:
+        type: string
+        default: 62fb5d63cd470527f65f7d05 
+
+      perWeek:
+        type: boolean
+        default: false       
+
+                 

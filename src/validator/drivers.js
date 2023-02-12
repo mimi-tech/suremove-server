@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const { bookingDetails } = require("./booking");
 
 module.exports = {
   
@@ -16,7 +17,7 @@ module.exports = {
         owner: Joi.boolean().required(),
         country:Joi.string().required(),
         state:Joi.string().required(),
-        driversEmail:Joi.string().required(),
+        driverEmail:Joi.string().required(),
         
 
   },
@@ -134,7 +135,7 @@ module.exports = {
     lastName: Joi.string().required(),
     email: Joi.string().required(),
     phoneNumber: Joi.string().required(),
-    profilePicure: Joi.string().required(),
+    profilePicture: Joi.string().required(),
     companyId: Joi.string().required(),
     customerInfo:Joi.object({
       id: Joi.string().required(),
@@ -148,6 +149,14 @@ module.exports = {
     id: Joi.string().required(),
     name: Joi.string().required(),
 }).required(),
+    bookingDetails:Joi.object({
+      size: Joi.string().required(),
+      number: Joi.number().required(),
+      name: Joi.string().required(),
+      weight: Joi.number().required(),
+      sourceAddress: Joi.string().required(),
+      destinationAddress: Joi.string().required(),
+    })
   },
 
   getAllRejectedBooking: {
