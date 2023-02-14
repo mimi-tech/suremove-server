@@ -44,11 +44,12 @@ const db = admin.firestore();
 
     //check if driver has an account
     const isDriverAccountExisting = await usersAccount.findOne({
-      email: dataparams.driversEmail,
+      email: dataparams.driverEmail,
       isActive:true
     });
   
     if (!isDriverAccountExisting) {
+      
       return {
         status: false,
         message: "This user does not have a valid account",
@@ -97,11 +98,11 @@ const db = admin.firestore();
 //check if driver has an account
 const res = await bookingConnection.create({
   driverId:createDrivers._id,
-  bookingId:"",
+  bookingId:"455",
   reject:false,
   accept:false,
   connect: false,
-  customerId:"",
+  customerId:"455",
   cancel:false,
   transit: false
 });
@@ -127,7 +128,7 @@ const res = await bookingConnection.create({
       message: "Error occurred creating drivers account",
     };
   } catch (e) {
-    console.log(e)
+   console.log(e);
     return {
       status: false,
       message: constants.SERVER_ERROR("CREATING DRIVER'S ACCOUNT"),

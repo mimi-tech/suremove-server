@@ -48,30 +48,6 @@ routes.get(
 );
 
 routes.get(
-  "/send-email-code",
-  validate(validator.sendEmailVerificationCode),
-  users.sendEmailVerificationCode
-);
-
-routes.post(
-  "/send-email-code",
-  validate(validator.sendEmailVerificationCode),
-  users.sendEmailVerificationCode
-);
-
-routes.post(
-  "/verify-email-code",
-  validate(validator.verifyEmailVerificationCode),
-  users.verifyEmailVerificationCode
-);
-
-routes.post(
-  "/verify-email-code",
-  validate(validator.verifyEmailVerificationCode),
-  users.verifyEmailVerificationCode
-);
-
-routes.get(
   "/get-transaction-history",
   validate(validator.getTransactionHistory),
   users.getTransactionHistory

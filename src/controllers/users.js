@@ -36,15 +36,7 @@ const searchUsers = async (req, res) => {
   return response(res, data);
 };
 
-const sendEmailVerificationCode = async (req, res) => {
-  const data = await users.sendEmailVerificationCode(req.form);
-  return response(res, data);
-};
 
-const verifyEmailVerificationCode = async (req, res) => {
-  const data = await users.verifyEmailVerificationCode(req.form);
-  return response(res, data);
-};
 const getTransactionHistory = async (req, res) => {
   const data = await users.getTransactionHistory(req.form);
   return response(res, data);
@@ -73,8 +65,6 @@ module.exports = {
   updatePhoneNumber,
   updateWallet,
   searchUsers,
-  sendEmailVerificationCode,
-  verifyEmailVerificationCode,
   getTransactionHistory,
   deleteATransaction,
   getUserReferrals,

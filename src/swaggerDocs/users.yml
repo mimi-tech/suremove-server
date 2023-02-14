@@ -191,56 +191,6 @@ paths:
           description: should return search all users successful
 
 
-  /users/verify-email-code:
-    post:
-      tags: # Tag property
-        - USERS # Value of the tag
-      summary: FOR VERIFYING EMAIL CODE SENT TO A USER
-      produces:
-        - application/json
-      parameters:
-        - in: header
-          name: authorization
-          description: access token
-          required: true
-          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-
-
-        - in: body # request body
-          name: verify-email-code# name of request, can be any name
-          description: It enables users email to be verified
-          required: true # can also be true depending on user preference
-          schema: # Schema definition
-            $ref: "#/definitions/sendVerification"
-      responses: # server responses
-        200:
-          description: should return phone number updated successfully
-
-
-  /users/send-email-code:
-    post:
-      tags: # Tag property
-        - USERS # Value of the tag
-      summary: FOR SENDING EMAIL CODE VERIFICATION
-      produces:
-        - application/json
-      parameters:
-        - in: header
-          name: authorization
-          description: access token
-          required: true
-          default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2MzIwODQxODB9.60qxpvDKlXV3x4-XDf2GRWgEkuSvL_XuCYPbn5jil-
-
-        - in: body # request body
-          name: send-email-code# name of request, can be any name
-          description: It enables users to update their phone number
-          required: true # can also be true depending on user preference
-          schema: # Schema definition
-            $ref: "#/definitions/sendVerification"
-      responses: # server responses
-        200:
-          description: should return email code sent successfully                    
-
-
 
 
   /users/get-transaction-history:
@@ -398,12 +348,7 @@ definitions: # Schema definition for request body
         type: string
         default: driver1@gmail.com      
 
-  sendVerification:
-    type: object
-    properties:
-      emailAdress:
-        type: string
-        default: mimi@gmail.com  
+    
 
 
 

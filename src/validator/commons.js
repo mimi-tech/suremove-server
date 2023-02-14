@@ -7,6 +7,8 @@ module.exports = {
     weightRange: Joi.array().required(),
     contributorId:Joi.string(),
     ownerId:Joi.string(),
+    companyName: Joi.string(),
+    companyAddress: Joi.string(),
   },
 
   getCommons:{

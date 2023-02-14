@@ -10,7 +10,7 @@ module.exports = {
         currentLocationLat: Joi.number().required(),
         currentLocationLog: Joi.number().required(),
         lincense: Joi.object({
-            number: Joi.number().required(),
+            number: Joi.string().required(),
             issuedDate: Joi.string().required(),
             expringDate: Joi.string().required(),
         }).required(),

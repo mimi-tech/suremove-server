@@ -53,6 +53,9 @@ module.exports = {
       .valid("customer", "driver","company","admin","contributor","owner"),
   },
   
-  sendEmailVerificationCode: { },
+  sendEmailVerificationCode:{
+    emailAddress : Joi.string().required(),
+    newEmailAddress:Joi.string().required()
+  },
   verifyEmailVerificationCode: {},
 };

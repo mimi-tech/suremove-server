@@ -40,6 +40,17 @@ const updateAccountData = async (req, res) => {
   return response(res, data);
 }
 
+const sendEmailVerificationCode = async (req, res) => {
+  const data = await auth.sendEmailVerificationCode(req.form);
+  return response(res, data);
+};
+
+const verifyEmailVerificationCode = async (req, res) => {
+  const data = await auth.verifyEmailVerificationCode(req.form);
+  return response(res, data);
+};
+
+
 
 module.exports = {
   welcomeText,
@@ -50,5 +61,7 @@ module.exports = {
   validateForgotPasswordCode,
   updatePassword,
   updateAccountData,
+  sendEmailVerificationCode,
+  verifyEmailVerificationCode
 
 };

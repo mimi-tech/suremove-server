@@ -48,5 +48,14 @@ routes.put(
   validate(validator.updateAccountData),
   auth.updateAccountData
 );
-
+routes.post(
+  "/send-email-code",
+  validate(validator.sendEmailVerificationCode),
+  auth.sendEmailVerificationCode
+);
+routes.post(
+  "/verify-email-code",
+  validate(validator.verifyEmailVerificationCode),
+  auth.verifyEmailVerificationCode
+);
 module.exports = routes;

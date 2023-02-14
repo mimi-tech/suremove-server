@@ -472,109 +472,6 @@ const publicData = {
   };
 
 
-  /**
- * for sending email address code
- * @param {Object} params  user id {authId} params needed.
- * @returns {Promise<Object>} Contains status, and returns data and message
- */
-
- const sendEmailVerificationCode = async (params) => {
-  try {
-    const { emailAddress, newEmailAddress } = params;
-
-    //check if the user is already existing
-    const user = await usersAccount.findOne({
-      email: emailAddress,
-    });
-
-    if (!user) {
-      return {
-        status: false,
-        message: "User does not exist",
-      };
-    }
-
-    if(newEmailAddress !== null){
-      //check if the user is already existing
-    const user = await usersAccount.findOne({
-      email: newEmailAddress,
-    });
-
-    if (user) {
-      return {
-        status: false,
-        message: "This email already exists",
-      };
-    }
-    }
-
-    //generate email code
-    const emailCode = generalHelperFunctions.generateEmailCode();
-
-    //send emailCode to user email
-    const { status: EmailStatusCode } =
-    await EmailService.sendEmailVerificationCode({
-    user: user.email,
-    code: emailCode,
-    name:user.firstName
-    });
-  
-    if(EmailStatusCode){
-      return {
-        status: true,
-        code: emailCode,
-        message: "A code has been sent your email successfully",
-      };
-    }
-    return {
-      status: false,
-      message: "There was an error sending your email code",
-    };
-  } catch (e) {
-    
-    return {
-      status: false,
-      message: constants.SERVER_ERROR("SENDING EMAIL CODE"),
-    };
-  }
-};
-
-/**
- * for sending email address code
- * @param {Object} params  user id {authId} params needed.
- * @returns {Promise<Object>} Contains status, and returns data and message
- */
-
- const verifyEmailVerificationCode = async (params) => {
-  try {
-    const { authId } = params;
-
-    //check if the user is already existing
-    const user = await usersAccount.findOne({
-      _id: authId,
-    });
-
-    if (!user) {
-      return {
-        status: false,
-        message: "User does not exist",
-      };
-    }
-    user.isEmailVerified = true;
-    user.save();
-    return {
-      data: user,
-      status: true,
-      message: "Email verified successfully",
-    };
-   
-  } catch (e) {
-    return {
-      status: false,
-      message: constants.SERVER_ERROR("SENDING EMAIL CODE"),
-    };
-  }
-};
 
 
 
@@ -802,8 +699,6 @@ module.exports = {
   updatePhoneNumber,
   updateWallet,
   searchUsers,
-  sendEmailVerificationCode,
-  verifyEmailVerificationCode,
   getTransactionHistory,
   deleteATransaction,
   getUserReferrals,

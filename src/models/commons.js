@@ -18,6 +18,14 @@ const commons = new mongoose.Schema(
 
       ownerId: {
         type: String
+      },
+
+      companyName:{
+        type: String
+      },
+
+      companyAddress:{
+        type: String
       }
 
   },

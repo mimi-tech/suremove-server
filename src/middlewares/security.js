@@ -11,9 +11,8 @@ const nonRestrictedEndPoints = [
   "/forgotPassword",
   "/validate-forgot-password-code",
   "/update-password",
-  
-  
-  
+  "/send-email-code",
+  "/verify-email-code",
 ];
 
 
@@ -68,8 +67,6 @@ const restricted = [
   "/get-awaiting-booking",
   "/delete-awaiting-booking",
   "/search-user",
-  "/send-email-code",
-  "/verify-email-code",
   "/get-transaction-history",
   "/delete-transaction-history",
   "/get-user-referral",
@@ -100,6 +97,7 @@ module.exports = async (req, res, next) => {
     try {
       jwt.verify(req.headers["x-access-token"], process.env.SECRET);
     } catch (error) {
+      console.log(error);
       return response(
         res,
         { status: false, message: "Unauthorized Access!  " },
@@ -110,6 +108,7 @@ module.exports = async (req, res, next) => {
   } else {
     //validates request if is restricted
     const token = req.headers.authorization;
+    
     const body = { token: token };
     const data = await auth.validateUserToken(body);
     if (data.status === false) {

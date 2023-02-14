@@ -49,7 +49,7 @@ const getCommons  = async (params) => {
  */
 const addCommons  = async (params) => {
     try {
-      const { sizeRange, weightRange,contributorId,ownerId} = params;
+      const { sizeRange, weightRange,contributorId,ownerId,companyName,companyAddress} = params;
   
       //check if collection exist 
 
@@ -60,7 +60,9 @@ const addCommons  = async (params) => {
         sizeRange:sizeRange,
         weightRange:weightRange,
         contributorId:contributorId,
-        ownerId:ownerId
+        ownerId:ownerId,
+        companyName:companyName,
+        companyAddress:companyAddress
       });
         
   
@@ -82,7 +84,9 @@ const addCommons  = async (params) => {
       sizeRange:sizeRange,
       weightRange:weightRange,
       contributorId:contributorId,
-      ownerId:ownerId
+      ownerId:ownerId,
+      companyName:companyName,
+      companyAddress:companyAddress
     
     });
       if(updateData) {

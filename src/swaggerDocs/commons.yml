@@ -142,7 +142,15 @@ definitions: # Schema definition for request body
 
       ownerId:
         type: string
-        default:  62feb4c3e0ebd55aa73889f9     
+        default:  62feb4c3e0ebd55aa73889f9  
+
+      companyName:
+        type: string
+        default:  SureMove  
+
+      companyAddress:
+        type: string
+        default:  No 555b New Owerri Imo State         
 
 
   notification:
