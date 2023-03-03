@@ -927,7 +927,7 @@ const getDriverBookingConnection = async (params) => {
     
       return {
         status: true,
-        data: doc.data(),
+        data: res,
         message: "You got a booking"
       };
     }
@@ -939,7 +939,7 @@ const getDriverBookingConnection = async (params) => {
     
       return {
         status: true,
-        data: doc.data(),
+        data: res,
         message: "Driver accepted the request"
       };
     }

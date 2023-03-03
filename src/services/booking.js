@@ -40,9 +40,10 @@ if (!admin.apps.length) {
  */
 
  const bookingDetails = async (params) => {
+  
   try {
     const { authId, ...dataToUpload} = params;
-
+   
     const year = generalHelperFunctions.generateYear();
     const month = generalHelperFunctions.generateMonth();
     const week = generalHelperFunctions.generateWeek();
@@ -92,7 +93,7 @@ if (!admin.apps.length) {
       });
   
       if (isUserExisting) {
-        
+        console.log("yesss")
         const filter = { customerAuthId: authId };
       
      const addBooking = await bookingCollection.findOneAndUpdate(filter, {
@@ -131,11 +132,18 @@ if (!admin.apps.length) {
         res.customerId = dataToUpload.sender.id;
         res.bookingId = addBooking._id;
         res.reject = false;
-        res.accept = false;
+        res.accept = true;
          res.save();
+
+         return {
+          status: true,
+          data:addBooking,
+          message: "Booking details saved successfully",
+        };
        
       }
       
+      console.log("nooo")
 
     const details = await bookingCollection.create({
       year:year,
@@ -175,6 +183,8 @@ if (!admin.apps.length) {
        
       
   } catch (e) {
+    
+ 
     return {
       status: false,
       message: constants.SERVER_ERROR("CREATING BOOKING APP ACCOUNT"),
